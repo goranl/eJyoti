@@ -95,12 +95,14 @@
     var RADS = Math.PI/180;
     var EPS  = 1.0e-12;
     
-    var mygrahas  = [];
-    var mybhavas  = [];
-    var myrashis  = [];
-    var mynaksha  = [];
-    var mynakshal = [];
-    var mynakshap = [];
+    var mygrahas   = [];
+    var mybhavas   = [];
+    var myrashis   = [];
+    var mynaksha   = [];
+    var mynakshal  = [];
+    var mynakshap  = [];
+    var mynavamsaz = [];
+    var mynavamsah = [];
     
     /* Planets or Grahas */
     var AS    = 0;  /* Ascendant or Lagna  */
@@ -296,82 +298,86 @@
         this.naksha  = "";
         this.house   = "";
         this.zodiac  = "";
-        this.zn      = "";
+        this.rasizn  = "";
         this.degree  = "";
         this.retro   = "";
         this.range   = "";
+        this.navdeg  = ""; /* Navamsa degree */
+        this.navzn   = ""; /* Navamsa zodiac */
         this.getra      = function()  { return this.ra;     }
-        this.getzn      = function()  { return this.zn;     }
+        this.getzn      = function()  { return this.rasizn; }
         this.getzodiac  = function()  { return this.zodiac; }
         this.getdegree  = function()  { return this.degree; }
         this.compute    = function()  {
-           if (this.ra < 0) { this.ra += 360; }   
+           if (this.ra < 0) { this.ra += 360; }
+           this.navdeg  = mod2pi(this.ra*RADS * 9.0 )*DEGS;  
+           this.navzn   = calc_zodiac(this.navdeg);
            if (this.ra>=0 && this.ra<=30)        {
                this.zodiac="Aries";
-               this.zn=1;this.range="0-30";
+               this.rasizn=1;this.range="0-30";
                this.degree=(this.ra-0);
            }
            else if (this.ra>30  && this.ra<=60)  {
                this.zodiac="Taurus";
-               this.zn=2;
+               this.rasizn=2;
                this.range="30-60";
                this.degree=(this.ra-30);
            }
            else if (this.ra>60  && this.ra<=90)  {
                this.zodiac="Gemini";
-               this.zn=3;
+               this.rasizn=3;
                this.range="60-90";
                this.degree=(this.ra-60);
            }
            else if (this.ra>90  && this.ra<=120) {
                this.zodiac="Cancer";
-               this.zn=4;this.range="90-120";
+               this.rasizn=4;this.range="90-120";
                this.degree=(this.ra-90);
            }
            else if (this.ra>120 && this.ra<=150) {
                this.zodiac="Leo";
-               this.zn=5;
+               this.rasizn=5;
                this.range="120-150";
                this.degree=(this.ra-120);
            }
            else if (this.ra>150 && this.ra<=180) {
                this.zodiac="Virgo";
-               this.zn=6;
+               this.rasizn=6;
                this.range="150-180";
                this.degree=(this.ra-150);
            }
            else if (this.ra>180 && this.ra<=210) {
                this.zodiac="Libra";
-               this.zn=7;this.range="180-210";
+               this.rasizn=7;this.range="180-210";
                this.degree=(this.ra-180);
            }
            else if (this.ra>210 && this.ra<=240) {
                this.zodiac="Scorpio";
-               this.zn=8;
+               this.rasizn=8;
                this.range="210-240";
                this.degree=(this.ra-210);
            }
            else if (this.ra>240 && this.ra<=270) {
                this.zodiac="Sagittarius";
-               this.zn=9;
+               this.rasizn=9;
                this.range="240-270";
                this.degree=(this.ra-240);
            }
            else if (this.ra>270 && this.ra<=300) {
                this.zodiac="Capricorn";
-               this.zn=10;
+               this.rasizn=10;
                this.range="270-300";
                this.degree=(this.ra-270);
            }
            else if (this.ra>300 && this.ra<=330) {
                this.zodiac="Aquarius";
-               this.zn=11;
+               this.rasizn=11;
                this.range="300-330";
                this.degree=(this.ra-300);
            }
            else if (this.ra>330 && this.ra<=360) {
                this.zodiac="Pisces";
-               this.zn=12;
+               this.rasizn=12;
                this.range="330-360";
                this.degree=(this.ra-330);
            }
@@ -407,30 +413,68 @@
         for (var i=0; i<=11; i++)  {
             for (j=0; j<=9; j++) {
                 if (j>9) j=0;
-                if (myrashis[i] == mygrahas[j].zn && (i==0))
+                if (myrashis[i] == mygrahas[j].rasizn && (i==0))
                     mybhavas[1] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].zn && i==1)
+                else if (myrashis[i] == mygrahas[j].rasizn && i==1)
                     mybhavas[2] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].zn && i==2)
+                else if (myrashis[i] == mygrahas[j].rasizn && i==2)
                     mybhavas[3] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].zn && i==3)
+                else if (myrashis[i] == mygrahas[j].rasizn && i==3)
                     mybhavas[4] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].zn && i==4)
+                else if (myrashis[i] == mygrahas[j].rasizn && i==4)
                     mybhavas[5] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].zn && i==5)
+                else if (myrashis[i] == mygrahas[j].rasizn && i==5)
                     mybhavas[6] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].zn && i==6)
+                else if (myrashis[i] == mygrahas[j].rasizn && i==6)
                     mybhavas[7] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].zn && i==7)
+                else if (myrashis[i] == mygrahas[j].rasizn && i==7)
                     mybhavas[8] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].zn && i==8)
+                else if (myrashis[i] == mygrahas[j].rasizn && i==8)
                     mybhavas[9] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].zn && i==9)
+                else if (myrashis[i] == mygrahas[j].rasizn && i==9)
                     mybhavas[10] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].zn && i==10)
+                else if (myrashis[i] == mygrahas[j].rasizn && i==10)
                     mybhavas[11] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].zn && i==11)
+                else if (myrashis[i] == mygrahas[j].rasizn && i==11)
                     mybhavas[12] +=  mygrahas[j].name+" ";
+            }
+        }
+    }
+    
+    function calc_navamsa ()
+    {
+        mynavamsah[1]=""; mynavamsah[2]=""; mynavamsah[3]=""; mynavamsah[4]="";
+        mynavamsah[5]=""; mynavamsah[6]=""; mynavamsah[7]=""; mynavamsah[8]="";
+        mynavamsah[9]=""; mynavamsah[10]="";mynavamsah[11]="";mynavamsah[12]="";
+        
+        var j=0;
+        for (var i=0; i<=11; i++)  {
+            for (j=0; j<=9; j++) {
+                if (j>9) j=0;
+                if (mynavamsaz[i] == mygrahas[j].navzn && (i==0))
+                    mynavamsah[1] +=  mygrahas[j].name+" ";
+                else if (mynavamsaz[i] == mygrahas[j].navzn && i==1)
+                    mynavamsah[2] +=  mygrahas[j].name+" ";
+                else if (mynavamsaz[i] == mygrahas[j].navzn && i==2)
+                    mynavamsah[3] +=  mygrahas[j].name+" ";
+                else if (mynavamsaz[i] == mygrahas[j].navzn && i==3)
+                    mynavamsah[4] +=  mygrahas[j].name+" ";
+                else if (mynavamsaz[i] == mygrahas[j].navzn && i==4)
+                    mynavamsah[5] +=  mygrahas[j].name+" ";
+                else if (mynavamsaz[i] == mygrahas[j].navzn && i==5)
+                    mynavamsah[6] +=  mygrahas[j].name+" ";
+                else if (mynavamsaz[i] == mygrahas[j].navzn && i==6)
+                    mynavamsah[7] +=  mygrahas[j].name+" ";
+                else if (mynavamsaz[i] == mygrahas[j].navzn && i==7)
+                    mynavamsah[8] +=  mygrahas[j].name+" ";
+                else if (mynavamsaz[i] == mygrahas[j].navzn && i==8)
+                    mynavamsah[9] +=  mygrahas[j].name+" ";
+                else if (mynavamsaz[i] == mygrahas[j].navzn && i==9)
+                    mynavamsah[10] +=  mygrahas[j].name+" ";
+                else if (mynavamsaz[i] == mygrahas[j].navzn && i==10)
+                    mynavamsah[11] +=  mygrahas[j].name+" ";
+                else if (mynavamsaz[i] == mygrahas[j].navzn && i==11)
+                    mynavamsah[12] +=  mygrahas[j].name+" ";
             }
         }
     }
@@ -516,6 +560,13 @@
             else                        { myrashis[i]=calc_zodiac(as)+i; }   
         }
         
+        var x=1,deg=0;
+        deg =  mod2pi(mygrahas[0].getra()*RADS * 9.0 )*DEGS;
+        for (var i=0; i<MAXZOD; i++) {
+            if (calc_zodiac(deg)+i > 12) { mynavamsaz[i]=x; x++;              }
+            else						 { mynavamsaz[i]=calc_zodiac(deg)+i;  }   
+        }
+        
         for (var i=0; i<=9; i++) {
             mynaksha [i] = calc_nakshatra(mygrahas[i].getra(),1);
             mynakshal[i] = calc_nakshatra(mygrahas[i].getra(),2);
@@ -523,6 +574,7 @@
         }
         
         calc_houses();
+        calc_navamsa();
     }
         
     function elements ()
@@ -1415,21 +1467,21 @@
         var canvas_chart = document.getElementById('canvas_chart');
         var mychart = canvas_chart.getContext('2d');
         mychart.clearRect (0, 0, canvas_chart.width, canvas_chart.height);
-        draw_empty_chart (mychart,canvas_chart,0,0,0.8);
-        draw_empty_chart (mychart,canvas_chart,330,0,0.1);
         
+        draw_empty_chart (mychart,canvas_chart,0,0,0.2);
         draw_zodiacs (mychart);
         draw_houses (mychart);
-        draw_smile (mychart);
+        
+        draw_empty_chart (mychart,canvas_chart,330,0,0.2);
+        draw_navamsa (mychart);
+        /* draw_smile (mychart); */
     }
     
     function draw_zodiacs (canvas) 
     {
         canvas.font = '7pt Arial';
         canvas.textAlign = 'center';
-        canvas.fillStyle = '505050';
-        canvas.shadowBlur = 1;
-        canvas.shadowColor="white";
+        canvas.fillStyle = 'green';
         
         var pos=[125,93,  62,43,   50,54,   111,104, 
                  50,154,  62,165,  125,117, 188,165, 
@@ -1455,8 +1507,6 @@
         canvas.font = '8pt Arial';
         canvas.textAlign = 'center';
         canvas.fillStyle = 'green';
-        canvas.shadowBlur = 1;
-        canvas.shadowColor="white";
         
         var pos=[125,53,  62,13,   26,54,   62,104, 
                  26,154,  62,195,  125,154, 188,195, 
@@ -1623,6 +1673,54 @@
         canvas.moveTo(x, y+200);
         canvas.lineTo(x+250, y);
         canvas.stroke();
+    }
+    
+    function draw_navamsa (canvas)
+    {        
+        canvas.font = '7pt Arial';
+        canvas.textAlign = 'center';
+        var xoffset = 330;
+        var pos=[125,93,  62,43,   50,54,   111,104, 
+                 50,154,  62,165,  125,117, 188,165, 
+                 200,154, 139,104, 200,54,  188,43 ];
+        
+        canvas.fillText(mynavamsaz[0], pos[0]+xoffset, pos[1]);
+        canvas.fillText(mynavamsaz[1], pos[2]+xoffset, pos[3]);
+        canvas.fillText(mynavamsaz[2], pos[4]+xoffset, pos[5]);
+        canvas.fillText(mynavamsaz[3], pos[6]+xoffset, pos[7]);
+        canvas.fillText(mynavamsaz[4], pos[8]+xoffset, pos[9]);
+        canvas.fillText(mynavamsaz[5], pos[10]+xoffset,pos[11]);
+        canvas.fillText(mynavamsaz[6], pos[12]+xoffset,pos[13]);
+        canvas.fillText(mynavamsaz[7], pos[14]+xoffset,pos[15]);      
+        canvas.fillText(mynavamsaz[8], pos[16]+xoffset,pos[17]);      
+        canvas.fillText(mynavamsaz[9], pos[18]+xoffset,pos[19]);  
+        canvas.fillText(mynavamsaz[9], pos[18]+xoffset,pos[19]);  
+        canvas.fillText(mynavamsaz[10], pos[20]+xoffset,pos[21]); 
+        canvas.fillText(mynavamsaz[11], pos[22]+xoffset,pos[23]); 
+        
+        canvas.font = '8pt Arial';
+        canvas.textAlign = 'center';
+        var pos=[125,53,  62,13,   26,54,   62,104, 
+                 26,154,  62,195,  125,154, 188,195, 
+                 224,154, 189,104, 224,54,  188,13 ];
+ 
+        /*if (mybhavas[i].length > 8) 
+              canvas.font = '7pt Arial';
+          else 
+              canvas.font = '8pt Arial';
+        */
+        canvas.fillText(mynavamsah[1], pos[0]+xoffset, pos[1]);
+        canvas.fillText(mynavamsah[2], pos[2]+xoffset, pos[3]);
+        canvas.fillText(mynavamsah[3], pos[4]+xoffset, pos[5]);
+        canvas.fillText(mynavamsah[4], pos[6]+xoffset, pos[7]);
+        canvas.fillText(mynavamsah[5], pos[8]+xoffset, pos[9]);
+        canvas.fillText(mynavamsah[6], pos[10]+xoffset,pos[11]);
+        canvas.fillText(mynavamsah[7], pos[12]+xoffset,pos[13]);
+        canvas.fillText(mynavamsah[8], pos[14]+xoffset,pos[15]);      
+        canvas.fillText(mynavamsah[9], pos[16]+xoffset,pos[17]);      
+        canvas.fillText(mynavamsah[10], pos[18]+xoffset,pos[19]); 
+        canvas.fillText(mynavamsah[11], pos[20]+xoffset,pos[21]); 
+        canvas.fillText(mynavamsah[12], pos[22]+xoffset,pos[23]);
     }
     
     function draw_smile (canvas) 
