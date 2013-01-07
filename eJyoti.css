@@ -232,6 +232,30 @@ button:active {
     background: #88a3b5;
 }
 
+.ribbon {
+  background-color: #FF9933;
+  overflow: hidden;
+  position: absolute;
+  right: -3em;
+  top: 2.0em;
+  -moz-transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  -moz-box-shadow: 0 0 2em #fff;
+  -webkit-box-shadow: 0 0 2em #fff;
+}
+
+.ribbon a {
+  border: 1px solid #fff;
+  color: #fff;
+  display: block;
+  font:  90% Arial, sans-serif;
+  margin: 0.05em 0 0.075em 0;
+  padding: 0.7em 4em;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 0 0 0.1em #fff;
+}
+
 footer {
     padding: 3px 20px 3px;
     display: block;

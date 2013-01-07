@@ -13,6 +13,9 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="eJyotivsop87.js"></script>
+        <div class="ribbon">
+            <a href="https://github.com/goranl/eJyoti" rel="me">Fork me on GitHub</a>
+        </div>
         <!-- Recommended fonts: Arial:15, Serif:15 -->
         <style>
             body          { margin: 1px; padding: 0px; }  
@@ -47,7 +50,7 @@
         pattern="[0-9]{2}:(0[1-9]|1[012]):(0[1-9]|1[0-9]|2[0-9]|3[01]{8,8}"  
         required>
         
-        <DIV id="mtz" title="Time Zone to GMT +|-&#013;East of GMT: +, and for West of GMT: -"
+        <DIV id="mtz" title="Time Zone to GMT +|-&#013;East of GMT: +, and for West of GMT: -&#013;(decimal)"
         onclick="location.href='http://www.greenwichmeantime.com';"><a>TZ: </a></DIV>
         <input type="number" id="tz" name="tz" min="-12" max="14" 
         placeholder="+1" value ="" step="1"
@@ -55,7 +58,7 @@
         
         <br>
         
-        <DIV id="mlat" title="If online, enter a location name&#013;and click on this link to obtain coords &#013;"
+        <DIV id="mlat" title="If online, enter a location name&#013;and click on this link to obtain coords "
         onclick="map()"><a>Latitude: </a></DIV>
         <input type="text" id="lat" name="lat" style="text-transform: uppercase;" 
         placeholder="45N48" value=""
@@ -74,10 +77,12 @@
 
 <article>
     <h1>BIRTH CHART</h1>
-    <canvas id="canvas_chart" tabindex="1" width="600" height="200">[ Rasi D1 and Navamsa D9 ]</canvas>
-    <p>
+    <canvas id="canvas_chart" tabindex="1" width="600" height="210">[ Rasi D1 and Navamsa D9 ]</canvas>
+    <!-- 
+        <p>
         Rasi ( D1 ) and Navamsa ( D9 )
-    </p>
+        </p> 
+    -->
 </article>
 
 <footer>
@@ -89,21 +94,43 @@
 
 <script>
 
-    var name,date,time,tz,lat,lon,latdir,londir,lattmp,lontmp,dn,hour,minute,second;
+    var name,date,time,tz,lat,lon,latdir,londir,lattmp,lontmp,dn,forward=0;
     
     var DEGS = 180/Math.PI;
     var RADS = Math.PI/180;
     var EPS  = 1.0e-12;
-    
-    var mygrahas   = [];
+   
+    var planets    = [];   
+    /* D1 zod,house  */
+    var mygrahas   = []; 
     var mybhavas   = [];
     var myrashis   = [];
+    /* D2 zod,house  */
+    var myhoraz    = [];
+    var myhorah    = [];
+    /* D6 zod,house  */
+    var mysashthamshaz = [];
+    var mysashthamshah = [];
+    /* D8 zod,house  */
+    var myashthamsaz = [];
+    var myashthamsah = [];
+    /* D9 zod,house  */
+    var mynavamsaz = [];
+    var mynavamsah = []; 
+    /* D12 zod,house */
+    var mydwadashamsaz = [];
+    var mydwadashamsah = []; 
+    
+    /* Nakshatras    */
     var mynaksha   = [];
     var mynakshal  = [];
     var mynakshap  = [];
-    var mynavamsaz = [];
-    var mynavamsah = [];
     
+    var index      = [ 2,2,6,6,8,8,9,9,12,12 ];
+    var division   = [ myhoraz,myhorah,mysashthamshaz,mysashthamshah,
+                       myashthamsaz,myashthamsah,mynavamsaz,mynavamsah,
+                       mydwadashamsaz,mydwadashamsah ];
+       
     /* Planets or Grahas */
     var AS    = 0;  /* Ascendant or Lagna  */
     var SU    = 1;  /* Sun     Surya      (Leo)                  South 7th          Sunday     6Y */
@@ -276,7 +303,7 @@
             lon = dms2real(parseInt(lontmp[0]), parseInt(lontmp[1]), parseInt(0));
         }
     }
-
+    
     function myplanets ( name,index,ra,ruler,r_index,aspect,day,
                          happy_zodiac,happy_house,sad_zodiac,sad_house,
                          good_friend, bad_friend) 
@@ -294,100 +321,234 @@
         this.sad_house    = sad_house;
         this.good_friend  = good_friend;
         this.bad_friend   = bad_friend;
-        this.dosha   = "";
-        this.naksha  = "";
-        this.house   = "";
-        this.zodiac  = "";
-        this.rasizn  = "";
-        this.degree  = "";
-        this.retro   = "";
-        this.range   = "";
-        this.navdeg  = ""; /* Navamsa degree */
-        this.navzn   = ""; /* Navamsa zodiac */
-        this.getra      = function()  { return this.ra;     }
-        this.getzn      = function()  { return this.rasizn; }
-        this.getzodiac  = function()  { return this.zodiac; }
-        this.getdegree  = function()  { return this.degree; }
-        this.compute    = function()  {
-           if (this.ra < 0) { this.ra += 360; }
-           this.navdeg  = mod2pi(this.ra*RADS * 9.0 )*DEGS;  
-           this.navzn   = calc_zodiac(this.navdeg);
-           if (this.ra>=0 && this.ra<=30)        {
-               this.zodiac="Aries";
-               this.rasizn=1;this.range="0-30";
-               this.degree=(this.ra-0);
-           }
-           else if (this.ra>30  && this.ra<=60)  {
-               this.zodiac="Taurus";
-               this.rasizn=2;
-               this.range="30-60";
-               this.degree=(this.ra-30);
-           }
-           else if (this.ra>60  && this.ra<=90)  {
-               this.zodiac="Gemini";
-               this.rasizn=3;
-               this.range="60-90";
-               this.degree=(this.ra-60);
-           }
-           else if (this.ra>90  && this.ra<=120) {
-               this.zodiac="Cancer";
-               this.rasizn=4;this.range="90-120";
-               this.degree=(this.ra-90);
-           }
-           else if (this.ra>120 && this.ra<=150) {
-               this.zodiac="Leo";
-               this.rasizn=5;
-               this.range="120-150";
-               this.degree=(this.ra-120);
-           }
-           else if (this.ra>150 && this.ra<=180) {
-               this.zodiac="Virgo";
-               this.rasizn=6;
-               this.range="150-180";
-               this.degree=(this.ra-150);
-           }
-           else if (this.ra>180 && this.ra<=210) {
-               this.zodiac="Libra";
-               this.rasizn=7;this.range="180-210";
-               this.degree=(this.ra-180);
-           }
-           else if (this.ra>210 && this.ra<=240) {
-               this.zodiac="Scorpio";
-               this.rasizn=8;
-               this.range="210-240";
-               this.degree=(this.ra-210);
-           }
-           else if (this.ra>240 && this.ra<=270) {
-               this.zodiac="Sagittarius";
-               this.rasizn=9;
-               this.range="240-270";
-               this.degree=(this.ra-240);
-           }
-           else if (this.ra>270 && this.ra<=300) {
-               this.zodiac="Capricorn";
-               this.rasizn=10;
-               this.range="270-300";
-               this.degree=(this.ra-270);
-           }
-           else if (this.ra>300 && this.ra<=330) {
-               this.zodiac="Aquarius";
-               this.rasizn=11;
-               this.range="300-330";
-               this.degree=(this.ra-300);
-           }
-           else if (this.ra>330 && this.ra<=360) {
-               this.zodiac="Pisces";
-               this.rasizn=12;
-               this.range="330-360";
-               this.degree=(this.ra-330);
-           }
+        this.house     = "";
+        this.zodiac    = "";
+        this.degree    = "";
+        this.dosha     = "";
+        this.naksha    = "";
+        this.retro     = "";
+        this.range     = "";
+        this.rasizn    = ""; /* Rasi zodiac index         */
+        this.horadeg   = ""; /* Hora degree               */
+        this.horazn    = ""; /* Hora zodiac index         */
+        this.drekkdeg  = ""; /* Drekkana degree           */
+        this.drekkzn   = ""; /* Drekkana zodiac index     */
+        this.turydeg   = ""; /* Turyamsa degree           */
+        this.turyzn    = ""; /* Turyamsa zodiac index     */
+        this.pancdeg   = ""; /* Panchamsa degree          */
+        this.panczn    = ""; /* Panchamsa zodiac index    */
+        this.shashdeg  = ""; /* Shashthamsa degree        */
+        this.shashzn   = ""; /* Shashthamsa zodiac index  */
+        this.shaptdeg  = ""; /* Shapthamsa degree         */
+        this.shaptzn   = ""; /* Shapthamsa zodiac index   */
+        this.ashtdeg   = ""; /* Ashthamsa degree          */
+        this.ashtzn    = ""; /* Ashthamsa zodiac index    */
+        this.navdeg    = ""; /* Navamsa degree            */
+        this.navzn     = ""; /* Navamsa zodiac index      */
+        this.dashdeg   = ""; /* Dashamsa degree           */
+        this.dashzn    = ""; /* Dashamsa zodiac index     */
+        this.ekaddeg   = ""; /* Ekadashamsa degree        */
+        this.ekadzn    = ""; /* Ekadashamsa zodiac index  */
+        this.dwaddeg   = ""; /* Dwadashamsa degree        */
+        this.dwadzn    = ""; /* Dwadashamsa zodiac index  */
+        this.getra     = function()  { return this.ra;     }
+        this.getzn     = function()  { return this.rasizn; }
+        this.getzodiac = function()  { return this.zodiac; }
+        this.getdegree = function()  { return this.degree; }
+        this.compute   = function()  
+        {
+            if (this.ra < 0) { this.ra += 360; }
+            // D2 - parasara traditional, 4 and 5
+            this.horadeg   = ((this.ra-15.0)-60.0*Math.floor((this.ra-15.0)*(1.0/60.0))+90);
+            this.horazn    = calc_zodiac(this.horadeg);
+            // D6 - continuos
+            this.shashdeg  = mod2pi(this.ra*6.0*RADS)*DEGS;
+            this.shashzn   = calc_zodiac(this.shashdeg);
+            // D8 - continuos
+            this.ashtdeg   = mod2pi(this.ra*8.0*RADS)*DEGS;  
+            this.ashtzn    = calc_zodiac(this.ashtdeg);
+            // D9 - continuos
+            this.navdeg    = mod2pi(this.ra*9.0*RADS)*DEGS;  
+            this.navzn     = calc_zodiac(this.navdeg);
+            // D12 - parasara traditional
+            var l1 = ((this.ra)-30.0*Math.floor((this.ra)*(1.0/30.0)))*12;
+            var l2 = parseInt((this.ra/30))*30;
+            this.dwaddeg   = mod2pi((l2+l1)*RADS)*DEGS; 
+            this.dwadzn    = calc_zodiac(this.dwaddeg);
+            
+            if (this.ra>=0 && this.ra<=30)        {
+                this.zodiac="Aries";
+                this.rasizn=1;this.range="0-30";
+                this.degree=(this.ra-0);
+            }
+            else if (this.ra>30  && this.ra<=60)  {
+                this.zodiac="Taurus";
+                this.rasizn=2;
+                this.range="30-60";
+                this.degree=(this.ra-30);
+            }
+            else if (this.ra>60  && this.ra<=90)  {
+                this.zodiac="Gemini";
+                this.rasizn=3;
+                this.range="60-90";
+                this.degree=(this.ra-60);
+            }
+            else if (this.ra>90  && this.ra<=120) {
+                this.zodiac="Cancer";
+                this.rasizn=4;this.range="90-120";
+                this.degree=(this.ra-90);
+            }
+            else if (this.ra>120 && this.ra<=150) {
+                this.zodiac="Leo";
+                this.rasizn=5;
+                this.range="120-150";
+                this.degree=(this.ra-120);
+            }
+            else if (this.ra>150 && this.ra<=180) {
+                this.zodiac="Virgo";
+                this.rasizn=6;
+                this.range="150-180";
+                this.degree=(this.ra-150);
+            }
+            else if (this.ra>180 && this.ra<=210) {
+                this.zodiac="Libra";
+                this.rasizn=7;this.range="180-210";
+                this.degree=(this.ra-180);
+            }
+            else if (this.ra>210 && this.ra<=240) {
+                this.zodiac="Scorpio";
+                this.rasizn=8;
+                this.range="210-240";
+                this.degree=(this.ra-210);
+            }
+            else if (this.ra>240 && this.ra<=270) {
+                this.zodiac="Sagittarius";
+                this.rasizn=9;
+                this.range="240-270";
+                this.degree=(this.ra-240);
+            }
+            else if (this.ra>270 && this.ra<=300) {
+                this.zodiac="Capricorn";
+                this.rasizn=10;
+                this.range="270-300";
+                this.degree=(this.ra-270);
+            }
+            else if (this.ra>300 && this.ra<=330) {
+                this.zodiac="Aquarius";
+                this.rasizn=11;
+                this.range="300-330";
+                this.degree=(this.ra-300);
+            }
+            else if (this.ra>330 && this.ra<=360) {
+                this.zodiac="Pisces";
+                this.rasizn=12;
+                this.range="330-360";
+                this.degree=(this.ra-330);
+            }  
+            
+            this.compute_division_zodiac();
+            this.compute_division_nakshatra();
+            this.compute_division_houses();
+        }
+        this.compute_division_zodiac = function()
+        {
+            // D1
+            var ay = calc_ayanamsa();
+            var as = calc_ascendant()-ay;
+            var x=1;
+            for (var i=0; i<MAXZOD; i++)  {
+                if (calc_zodiac(as)+i>12) { myrashis[i]=x; x++;            }
+                else                      { myrashis[i]=calc_zodiac(as)+i; }   
+            }
+            // D2
+            var x=1;
+            var deg = ((as-15.0)-60.0*Math.floor((as-15.0)*(1.0/60.0))+90);
+            for (var i=0; i<MAXZOD; i++)   {
+                if (calc_zodiac(deg)+i>12) { myhoraz[i]=x; x++;             }
+                else                       { myhoraz[i]=calc_zodiac(deg)+i; }   
+            }
+            // D6
+            var x=1;
+            var deg = mod2pi(as*6.0*RADS)*DEGS;
+            for (var i=0; i<MAXZOD; i++)   {
+                if (calc_zodiac(deg)+i>12) { mysashthamshaz[i]=x; x++;             }
+                else                       { mysashthamshaz[i]=calc_zodiac(deg)+i; }   
+            }
+            // D8
+            var x=1;
+            var deg = mod2pi(as*8.0*RADS)*DEGS;
+            for (var i=0; i<MAXZOD; i++)   {
+                if (calc_zodiac(deg)+i>12) { myashthamsaz[i]=x; x++;             }
+                else                       { myashthamsaz[i]=calc_zodiac(deg)+i; }   
+            }
+            // D9
+            var x=1,deg=0;
+            deg = mod2pi(as*9.0*RADS)*DEGS;  
+            for (var i=0; i<MAXZOD; i++)   {
+                if (calc_zodiac(deg)+i>12) { mynavamsaz[i]=x; x++;              }
+                else                       { mynavamsaz[i]=calc_zodiac(deg)+i;  }
+            }
+            // D12
+            var x=1,deg=0;
+            var l1 = ((as)-30.0*Math.floor((as)*(1.0/30.0)))*12;
+            var l2 = parseInt((as/30))*30;
+            deg    = mod2pi((l2+l1)*RADS)*DEGS;  
+            for (var i=0; i<MAXZOD; i++)   {
+                if (calc_zodiac(deg)+i>12) { mydwadashamsaz[i]=x; x++;              }
+                else                       { mydwadashamsaz[i]=calc_zodiac(deg)+i;  }
+            }
+        }
+        this.compute_division_nakshatra = function()
+        {
+            // 1-Nakshatras, 2-N.lord, 3-N.pada,
+            for (var i=0; i<=9; i++) {
+                mynaksha [i] = calc_nakshatra(mygrahas[i].getra(),1);
+                mynakshal[i] = calc_nakshatra(mygrahas[i].getra(),2);
+                mynakshap[i] = calc_nakshatra(mygrahas[i].getra(),3);
+            }
+        }
+        this.compute_division_houses = function()
+        {
+            // D1
+            for (var i=0; i<=9; i++) {
+                planets[i] = (mygrahas[i].rasizn);
+            }
+            calc_houses(myrashis,mybhavas,mygrahas);
+            // D2
+            for (var i=0; i<=9; i++) {
+                planets[i] = (mygrahas[i].horazn);
+            }
+            calc_houses(myhoraz,myhorah,mygrahas);
+            // D6
+            for (var i=0; i<=9; i++) {
+                planets[i] = (mygrahas[i].shashzn);
+            }
+            calc_houses(mysashthamshaz,mysashthamshah,mygrahas);
+            // D8
+            for (var i=0; i<=9; i++) {
+                planets[i] = (mygrahas[i].ashtzn);
+            }
+            calc_houses(myashthamsaz,myashthamsah,mygrahas);
+            // D9 
+            for (var i=0; i<=9; i++) {
+                planets[i] = (mygrahas[i].navzn); //.div name
+            }
+            calc_houses(mynavamsaz,mynavamsah,mygrahas);
+            // D12
+            for (var i=0; i<=9; i++) {
+                planets[i] = (mygrahas[i].dwadzn);
+            }
+            calc_houses(mydwadashamsaz,mydwadashamsah,mygrahas);
         }
     };
     
     function calc_zodiac (deg)
     {
         var zodiac;
-        if (deg < 0)                  {deg += 360;        } 
+        if (deg < 0) { deg += 360; } 
+        else if (deg > 360 ) {
+            deg = (deg-360.0*Math.floor(deg*(1.0/360.0)));
+        }
         if (deg>=0 && deg<=30)        {zodiac=Aries;      }
         else if (deg>30  && deg<=60)  {zodiac=Taurus;     }
         else if (deg>60  && deg<=90)  {zodiac=Gemini;     }
@@ -404,77 +565,40 @@
         return zodiac;
     }
     
-    function calc_houses ()
+    function calc_houses (zodiac,house,planetname)
     {
-        mybhavas[1]=""; mybhavas[2]=""; mybhavas[3]=""; mybhavas[4]="";
-        mybhavas[5]=""; mybhavas[6]=""; mybhavas[7]=""; mybhavas[8]="";
-        mybhavas[9]=""; mybhavas[10]="";mybhavas[11]="";mybhavas[12]="";
-        var j=0;
-        for (var i=0; i<=11; i++)  {
-            for (j=0; j<=9; j++) {
-                if (j>9) j=0;
-                if (myrashis[i] == mygrahas[j].rasizn && (i==0))
-                    mybhavas[1] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].rasizn && i==1)
-                    mybhavas[2] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].rasizn && i==2)
-                    mybhavas[3] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].rasizn && i==3)
-                    mybhavas[4] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].rasizn && i==4)
-                    mybhavas[5] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].rasizn && i==5)
-                    mybhavas[6] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].rasizn && i==6)
-                    mybhavas[7] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].rasizn && i==7)
-                    mybhavas[8] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].rasizn && i==8)
-                    mybhavas[9] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].rasizn && i==9)
-                    mybhavas[10] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].rasizn && i==10)
-                    mybhavas[11] +=  mygrahas[j].name+" ";
-                else if (myrashis[i] == mygrahas[j].rasizn && i==11)
-                    mybhavas[12] +=  mygrahas[j].name+" ";
-            }
-        }
-    }
-    
-    function calc_navamsa ()
-    {
-        mynavamsah[1]=""; mynavamsah[2]=""; mynavamsah[3]=""; mynavamsah[4]="";
-        mynavamsah[5]=""; mynavamsah[6]=""; mynavamsah[7]=""; mynavamsah[8]="";
-        mynavamsah[9]=""; mynavamsah[10]="";mynavamsah[11]="";mynavamsah[12]="";
+        house[1]=""; house[2]=""; house[3]=""; house[4]="";
+        house[5]=""; house[6]=""; house[7]=""; house[8]="";
+        house[9]=""; house[10]="";house[11]="";house[12]="";
         
-        var j=0;
-        for (var i=0; i<=11; i++)  {
+        var i,j;
+        for (i=0; i<=11; i++)  {
             for (j=0; j<=9; j++) {
                 if (j>9) j=0;
-                if (mynavamsaz[i] == mygrahas[j].navzn && (i==0))
-                    mynavamsah[1] +=  mygrahas[j].name+" ";
-                else if (mynavamsaz[i] == mygrahas[j].navzn && i==1)
-                    mynavamsah[2] +=  mygrahas[j].name+" ";
-                else if (mynavamsaz[i] == mygrahas[j].navzn && i==2)
-                    mynavamsah[3] +=  mygrahas[j].name+" ";
-                else if (mynavamsaz[i] == mygrahas[j].navzn && i==3)
-                    mynavamsah[4] +=  mygrahas[j].name+" ";
-                else if (mynavamsaz[i] == mygrahas[j].navzn && i==4)
-                    mynavamsah[5] +=  mygrahas[j].name+" ";
-                else if (mynavamsaz[i] == mygrahas[j].navzn && i==5)
-                    mynavamsah[6] +=  mygrahas[j].name+" ";
-                else if (mynavamsaz[i] == mygrahas[j].navzn && i==6)
-                    mynavamsah[7] +=  mygrahas[j].name+" ";
-                else if (mynavamsaz[i] == mygrahas[j].navzn && i==7)
-                    mynavamsah[8] +=  mygrahas[j].name+" ";
-                else if (mynavamsaz[i] == mygrahas[j].navzn && i==8)
-                    mynavamsah[9] +=  mygrahas[j].name+" ";
-                else if (mynavamsaz[i] == mygrahas[j].navzn && i==9)
-                    mynavamsah[10] +=  mygrahas[j].name+" ";
-                else if (mynavamsaz[i] == mygrahas[j].navzn && i==10)
-                    mynavamsah[11] +=  mygrahas[j].name+" ";
-                else if (mynavamsaz[i] == mygrahas[j].navzn && i==11)
-                    mynavamsah[12] +=  mygrahas[j].name+" ";
+                if (zodiac[i] == planets[j] && (i==0))
+                    house[1] +=  planetname[j].name+" ";
+                else if (zodiac[i] == planets[j] && i==1)
+                    house[2] +=  planetname[j].name+" ";
+                else if (zodiac[i] == planets[j] && i==2)
+                    house[3] +=  planetname[j].name+" ";
+                else if (zodiac[i] == planets[j] && i==3)
+                    house[4] +=  planetname[j].name+" ";
+                else if (zodiac[i] == planets[j] && i==4)
+                    house[5] +=  planetname[j].name+" ";
+                else if (zodiac[i] == planets[j] && i==5)
+                    house[6] +=  planetname[j].name+" ";
+                else if (zodiac[i] == planets[j] && i==6)
+                    house[7] +=  planetname[j].name+" ";
+                else if (zodiac[i] == planets[j] && i==7)
+                    house[8] +=  planetname[j].name+" ";
+                else if (zodiac[i] == planets[j] && i==8)
+                    house[9] +=  planetname[j].name+" ";
+                else if (zodiac[i] == planets[j] && i==9)
+                    house[10] +=  planetname[j].name+" ";
+                else if (zodiac[i] == planets[j] && i==10)
+                    house[11] +=  planetname[j].name+" ";
+                else if (zodiac[i] == planets[j] && i==11)
+                    house[12] +=  planetname[j].name+" ";
             }
         }
     }
@@ -534,7 +658,7 @@
         mygrahas[0] = new myplanets("As",AS,as,"","","","","","","","","","");
         
         mygrahas[1] = new myplanets("Su",SU,calc_vsop87(1)-ay,"Leo",Leo,"7","Sunday",
-                          "Le,Ar","1,5,9,10","Li","4,6,7,8,12","Mo,Ma,Ju","Sa,Ve");                         //0
+                          "Le,Ar","1,5,9,10","Li","4,6,7,8,12","Mo,Ma,Ju","Sa,Ve");            //calc_ra(0) //0
         mygrahas[2] = new myplanets("Mo",MO,calc_moon_positionIII()-ay,"Cancer",Cancer,"7","Monday",
                           "Ca,Ta","4,7,9,11,12","Sc,Cp","2,3,6,8","Su,Me"," - ");
         mygrahas[3] = new myplanets("Ma",MA,calc_vsop87(3)-ay,"Aries",Aries,"4,7,8","Tuesday",
@@ -553,28 +677,6 @@
                           "Sc,Pi,Sg,Ar","4,6,8,9,12","Ta,Ge,Vi,Li","1,2,3,5,7,10,11"," - "," - ");
         
         for (var i=0; i<=9; i++) {  mygrahas[i].compute(); }
-        
-        var x=1;
-        for (var i=0; i<MAXZOD; i++) {
-            if (calc_zodiac(as)+i > 12) { myrashis[i]=x; x++;            }
-            else                        { myrashis[i]=calc_zodiac(as)+i; }   
-        }
-        
-        var x=1,deg=0;
-        deg =  mod2pi(mygrahas[0].getra()*RADS * 9.0 )*DEGS;
-        for (var i=0; i<MAXZOD; i++) {
-            if (calc_zodiac(deg)+i > 12) { mynavamsaz[i]=x; x++;              }
-            else						 { mynavamsaz[i]=calc_zodiac(deg)+i;  }   
-        }
-        
-        for (var i=0; i<=9; i++) {
-            mynaksha [i] = calc_nakshatra(mygrahas[i].getra(),1);
-            mynakshal[i] = calc_nakshatra(mygrahas[i].getra(),2);
-            mynakshap[i] = calc_nakshatra(mygrahas[i].getra(),3);
-        }
-        
-        calc_houses();
-        calc_navamsa();
     }
         
     function elements ()
@@ -1351,15 +1453,17 @@
         s = s * 60;
         var mm = Math.floor( s );
         
-        hour = Math.floor( st );
+        var hour = Math.floor( st );
         
         st  = st - hour;
         st  = st * 60;
-        minute = Math.floor( st );
+        var minute = Math.floor( st );
         
         st  = st - minute;
         st  = st * 60;
-        second = Math.floor( st );
+        var second = Math.floor( st );
+        
+        return (hour+":"+minute+":"+second);
     }
     
     function _abs (x)
@@ -1434,7 +1538,7 @@
     
     function onmousedown (e)
     {
-        var x, y;
+        var x, y,d="D";
         var canvas_chart = document.getElementById('canvas_chart');
         var mychart = canvas_chart.getContext('2d');
         
@@ -1446,7 +1550,20 @@
             x = e.offsetX;
             y = e.offsetY;
         }
-        //mychart.clearRect (300, 0, 300, 200);
+        
+        if (x > 607 && x < 616 && y > 648 && y < 655 ) {
+             mychart.clearRect (300, 0, 300, 200);
+             draw_empty_chart (mychart,canvas_chart,330,0,0.2);
+             draw_division_chart (mychart,division[forward-2],division[forward-1],d+index[forward-1]);
+             forward -= 2; if (forward <= 0)  forward = 2;
+            
+        }
+        else if(x > 621 && x < 631 && y > 647 && y < 655 ) {
+             mychart.clearRect (300, 0, 300, 200);
+             draw_empty_chart (mychart,canvas_chart,330,0,0.2);
+             draw_division_chart (mychart,division[forward],division[forward+1],d+index[forward]);
+             forward += 2;  if (forward >= 10)  forward = 8;
+        }
     }
     
     function onkeydown (e) 
@@ -1461,20 +1578,20 @@
     function draw ()
     {   
         var canvas_info = document.getElementById('canvas_info');
-        var myinfo = canvas_info.getContext('2d');
-        draw_info (myinfo,canvas_info); 
-        
+        var myinfo = canvas_info.getContext('2d'); 
+         
         var canvas_chart = document.getElementById('canvas_chart');
         var mychart = canvas_chart.getContext('2d');
         mychart.clearRect (0, 0, canvas_chart.width, canvas_chart.height);
+        
+        draw_info (myinfo,canvas_info);
         
         draw_empty_chart (mychart,canvas_chart,0,0,0.2);
         draw_zodiacs (mychart);
         draw_houses (mychart);
         
         draw_empty_chart (mychart,canvas_chart,330,0,0.2);
-        draw_navamsa (mychart);
-        /* draw_smile (mychart); */
+        draw_division_chart (mychart,mynavamsaz,mynavamsah,'D9');
     }
     
     function draw_zodiacs (canvas) 
@@ -1627,7 +1744,7 @@
         
         canvas.textAlign="left";
         canvas.fillText("Ayanamsa: "+(calc_ayanamsa().toFixed(6))+'°', 2, 170); 
-        canvas.fillText("Sid. time:    "+(calc_sideral_time().toFixed(6))+'°', 2, 185);
+        canvas.fillText("Sid. time:    "+(deg2hms(calc_sideral_time())), 2, 185);
     }
     
     function draw_empty_chart (canvas,canvas_chart,_x,_y, lwidth) 
@@ -1675,7 +1792,7 @@
         canvas.stroke();
     }
     
-    function draw_navamsa (canvas)
+    function draw_division_chart (canvas,zodiac,house,d)
     {        
         canvas.font = '7pt Arial';
         canvas.textAlign = 'center';
@@ -1684,19 +1801,19 @@
                  50,154,  62,165,  125,117, 188,165, 
                  200,154, 139,104, 200,54,  188,43 ];
         
-        canvas.fillText(mynavamsaz[0], pos[0]+xoffset, pos[1]);
-        canvas.fillText(mynavamsaz[1], pos[2]+xoffset, pos[3]);
-        canvas.fillText(mynavamsaz[2], pos[4]+xoffset, pos[5]);
-        canvas.fillText(mynavamsaz[3], pos[6]+xoffset, pos[7]);
-        canvas.fillText(mynavamsaz[4], pos[8]+xoffset, pos[9]);
-        canvas.fillText(mynavamsaz[5], pos[10]+xoffset,pos[11]);
-        canvas.fillText(mynavamsaz[6], pos[12]+xoffset,pos[13]);
-        canvas.fillText(mynavamsaz[7], pos[14]+xoffset,pos[15]);      
-        canvas.fillText(mynavamsaz[8], pos[16]+xoffset,pos[17]);      
-        canvas.fillText(mynavamsaz[9], pos[18]+xoffset,pos[19]);  
-        canvas.fillText(mynavamsaz[9], pos[18]+xoffset,pos[19]);  
-        canvas.fillText(mynavamsaz[10], pos[20]+xoffset,pos[21]); 
-        canvas.fillText(mynavamsaz[11], pos[22]+xoffset,pos[23]); 
+        canvas.fillText(zodiac[0], pos[0]+xoffset, pos[1]);
+        canvas.fillText(zodiac[1], pos[2]+xoffset, pos[3]);
+        canvas.fillText(zodiac[2], pos[4]+xoffset, pos[5]);
+        canvas.fillText(zodiac[3], pos[6]+xoffset, pos[7]);
+        canvas.fillText(zodiac[4], pos[8]+xoffset, pos[9]);
+        canvas.fillText(zodiac[5], pos[10]+xoffset,pos[11]);
+        canvas.fillText(zodiac[6], pos[12]+xoffset,pos[13]);
+        canvas.fillText(zodiac[7], pos[14]+xoffset,pos[15]);      
+        canvas.fillText(zodiac[8], pos[16]+xoffset,pos[17]);      
+        canvas.fillText(zodiac[9], pos[18]+xoffset,pos[19]);  
+        canvas.fillText(zodiac[9], pos[18]+xoffset,pos[19]);  
+        canvas.fillText(zodiac[10], pos[20]+xoffset,pos[21]); 
+        canvas.fillText(zodiac[11], pos[22]+xoffset,pos[23]); 
         
         canvas.font = '8pt Arial';
         canvas.textAlign = 'center';
@@ -1709,24 +1826,29 @@
           else 
               canvas.font = '8pt Arial';
         */
-        canvas.fillText(mynavamsah[1], pos[0]+xoffset, pos[1]);
-        canvas.fillText(mynavamsah[2], pos[2]+xoffset, pos[3]);
-        canvas.fillText(mynavamsah[3], pos[4]+xoffset, pos[5]);
-        canvas.fillText(mynavamsah[4], pos[6]+xoffset, pos[7]);
-        canvas.fillText(mynavamsah[5], pos[8]+xoffset, pos[9]);
-        canvas.fillText(mynavamsah[6], pos[10]+xoffset,pos[11]);
-        canvas.fillText(mynavamsah[7], pos[12]+xoffset,pos[13]);
-        canvas.fillText(mynavamsah[8], pos[14]+xoffset,pos[15]);      
-        canvas.fillText(mynavamsah[9], pos[16]+xoffset,pos[17]);      
-        canvas.fillText(mynavamsah[10], pos[18]+xoffset,pos[19]); 
-        canvas.fillText(mynavamsah[11], pos[20]+xoffset,pos[21]); 
-        canvas.fillText(mynavamsah[12], pos[22]+xoffset,pos[23]);
+        canvas.fillText(house[1], pos[0]+xoffset, pos[1]);
+        canvas.fillText(house[2], pos[2]+xoffset, pos[3]);
+        canvas.fillText(house[3], pos[4]+xoffset, pos[5]);
+        canvas.fillText(house[4], pos[6]+xoffset, pos[7]);
+        canvas.fillText(house[5], pos[8]+xoffset, pos[9]);
+        canvas.fillText(house[6], pos[10]+xoffset,pos[11]);
+        canvas.fillText(house[7], pos[12]+xoffset,pos[13]);
+        canvas.fillText(house[8], pos[14]+xoffset,pos[15]);      
+        canvas.fillText(house[9], pos[16]+xoffset,pos[17]);      
+        canvas.fillText(house[10], pos[18]+xoffset,pos[19]); 
+        canvas.fillText(house[11], pos[20]+xoffset,pos[21]); 
+        canvas.fillText(house[12], pos[22]+xoffset,pos[23]);
+        
+        canvas.textAlign = 'center';
+        canvas.fillText(d, pos[0]+xoffset, 105);
+        canvas.textAlign = 'left';
+        canvas.fillText("-   +",xoffset, 210);
     }
     
     function draw_smile (canvas) 
     {
-        /* hier should be navamsa chart, but is not yet implemented 
-           if you have the knowledge 'and' the will, feel free to help :)
+        /*  hier should be navamsa chart, but is not yet implemented 
+            if you have the knowledge 'and' the will, feel free to help :)
          */
         canvas.beginPath();
         canvas.strokeStyle = '606060';
