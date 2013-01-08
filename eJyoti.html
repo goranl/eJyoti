@@ -13,7 +13,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="eJyotivsop87.js"></script>
-        <!-- Recommended fonts: Arial:15, Serif:15 -->
+        <!-- Recommended fonts: Arial:15, Serif:15 and Modern web browsers -->
         <div class="ribbon">
             <a href="https://github.com/goranl/eJyoti" rel="me">Fork me on GitHub</a>
         </div>
@@ -41,32 +41,29 @@
         <input type="text" id="name" name="name" placeholder="Name" value="" min="1" max="15">
 
         <label>Date:</label>
-        <input type="date" id="date" name="date" placeholder="1900-01-31" min="1000-01-01" max="6100-01-01" 
+        <input type="date" id="date" name="date" placeholder="1900/01/31" min="1000/01/01" max="6100/01/31" 
         pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01]{10,10}" value=""
         required>
         
-        <label>Time:</label>
+        <DIV id="mtime" title="Time format: 23:59">Time:</DIV>
         <input type="time" id="time" name="time" placeholder="23:59:59" value="" step="10"
         pattern="[0-9]{2}:(0[1-9]|1[012]):(0[1-9]|1[0-9]|2[0-9]|3[01]{8,8}"  
         required>
         
         <DIV id="mtz" title="Time Zone to GMT +|-&#013;East of GMT: +, and for West of GMT: -&#013;(decimal)"
         onclick="location.href='http://www.greenwichmeantime.com';"><a>TZ: </a></DIV>
-        <input type="number" id="tz" name="tz" min="-12" max="14" 
-        placeholder="+1" value ="" step="1"
+        <input type="number" id="tz" name="tz" min="-12" max="14" placeholder="+1" value ="" step="1"
         required>
         
         <br>
         
         <DIV id="mlat" title="If online, enter a location name&#013;and click on this link to obtain coords "
         onclick="map()"><a>Latitude: </a></DIV>
-        <input type="text" id="lat" name="lat" style="text-transform: uppercase;" 
-        placeholder="45N48" value=""
+        <input type="text" id="lat" name="lat" placeholder="45N48" value=""
         required>
        
         <DIV id="mlon" title="" onclick="map()"><a>Longitude: </a></DIV>
-        <input type="text" id="lon" name="lon" style="text-transform: uppercase;"
-        placeholder="15E58" value=""
+        <input type="text" id="lon" name="lon" placeholder="15E58" value=""
         required>
         
         <br>
@@ -216,12 +213,16 @@
         else 
         {   
             var l1 = "http://www.openstreetmap.org/?";
-            var tmp = document.getElementById('lat').value.replace(/\s+/g,"");
+            var tmp = document.getElementById('lat').value.replace(/\s+/g,"").toUpperCase();
             if (tmp.indexOf("N") !=-1) {
                 lattmp=tmp.split("N");
                 var l2 = dms2real(parseInt(lattmp[0]), parseInt(lattmp[1]), parseInt(0));
             }
-            var tmp = document.getElementById('lon').value.replace(/\s+/g,"");
+            else if (tmp.indexOf("S") !=-1) {
+                lattmp=tmp.split("S");
+                var l2 = dms2real(parseInt(lattmp[0]), parseInt(lattmp[1]), parseInt(0));
+            }  
+            var tmp = document.getElementById('lon').value.replace(/\s+/g,"").toUpperCase();
             if (tmp.indexOf("W") !=-1) {
                 lontmp=tmp.split("W");
                 var l3 = -dms2real(parseInt(lontmp[0]), parseInt(lontmp[1]), parseInt(0));
@@ -230,7 +231,7 @@
                 lontmp=tmp.split("E");
                 var l3 = dms2real(parseInt(lontmp[0]), parseInt(lontmp[1]), parseInt(0));
             }   
-            var l4 = "&zoom=13&polygon=1";
+            var l4 = "&zoom=13";
             var link = l1+"lat="+l2+"&lon="+l3+l4;
             
             /*var mapid  = document.getElementById("m");
@@ -256,8 +257,8 @@
         parse_date(document.getElementById('date').value);
         parse_time(document.getElementById('time').value);
         tz  = (document.getElementById('tz').value);
-        parse_latitude(document.getElementById('lat').value);
-        parse_longitude(document.getElementById('lon').value);
+        parse_latitude(document.getElementById('lat').value.toUpperCase()); 
+        parse_longitude(document.getElementById('lon').value.toUpperCase());
     }
     
     function parse_date (input) 
@@ -270,7 +271,7 @@
     {
         time = 0;
         time = new Date();
-        var tmp = input.match(/(\d+)(:(\d\d))?\s*(p?)/);
+        var tmp = input.match(/(\d+)(:(\d\d))/);
         time.setHours(parseInt(tmp[1]) + ((parseInt(tmp[1]) < 12 && tmp[4] ) ? 12 : 0));
         time.setMinutes((parseInt(tmp[3]) || 0));
         time.setSeconds(0); 
@@ -1551,18 +1552,20 @@
             y = e.offsetY;
         }
         
-        if (x > 607 && x < 616 && y > 648 && y < 656 ) {
+        if (x > 604 && x < 621 && y > 645 && y < 657 ) {
+        	 if (forward <= 0)  forward = 2;
              mychart.clearRect (300, 0, 300, 200);
              draw_empty_chart (mychart,canvas_chart,330,0,0.2);
              draw_division_chart (mychart,division[forward-2],division[forward-1],d+index[forward-1]);
-             forward -= 2; if (forward <= 0)  forward = 2;
+             forward -= 2; 
             
         }
-        else if(x > 621 && x < 631 && y > 647 && y < 656 ) {
+        else if(x > 623 && x < 637 && y > 645 && y < 657 ) {
+        	 if (forward >= 10)  forward = 8;
              mychart.clearRect (300, 0, 300, 200);
              draw_empty_chart (mychart,canvas_chart,330,0,0.2);
              draw_division_chart (mychart,division[forward],division[forward+1],d+index[forward]);
-             forward += 2;  if (forward >= 10)  forward = 8;
+             forward += 2;  
         }
     }
     
@@ -1842,7 +1845,7 @@
         canvas.textAlign = 'center';
         canvas.fillText(d, pos[0]+xoffset, 105);
         canvas.textAlign = 'left';
-        canvas.fillText("-   +",xoffset, 210);
+        canvas.fillText("-     +",xoffset, 209);
     }
     
     function draw_smile (canvas) 

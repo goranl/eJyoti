@@ -235,9 +235,9 @@ button:active {
 .ribbon {
   background-color: #FF9933;
   overflow: hidden;
-  position: absolute;
-  right: -3em;
-  top: 2.0em;
+  position: fixed;
+  left: -2.0em;
+  bottom: 2em;
   -moz-transform: rotate(45deg);
   -webkit-transform: rotate(45deg);
   -moz-box-shadow: 0 0 2em #fff;
@@ -245,12 +245,12 @@ button:active {
 }
 
 .ribbon a {
-  border: 1px solid #fff;
+  border: 1.5px solid #fff;
   color: #fff;
   display: block;
-  font:  90% Arial, sans-serif;
-  margin: 0.05em 0 0.075em 0;
-  padding: 0.7em 4em;
+  font:  80% Arial, sans-serif;
+  margin: 0.1em 0 0.1em 0;
+  padding: 0.1em 2em;
   text-align: center;
   text-decoration: none;
   text-shadow: 0 0 0.1em #fff;
