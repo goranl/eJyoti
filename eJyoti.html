@@ -1552,8 +1552,8 @@
             y = e.offsetY;
         }
         
-        if (x > 604 && x < 621 && y > 645 && y < 657 ) {
-        	 if (forward <= 0)  forward = 2;
+        if (x > 603 && x < 621 && y > 645 && y < 657 ) {
+             if (forward <= 0)  forward = 2;
              mychart.clearRect (300, 0, 300, 200);
              draw_empty_chart (mychart,canvas_chart,330,0,0.2);
              draw_division_chart (mychart,division[forward-2],division[forward-1],d+index[forward-1]);
@@ -1561,7 +1561,7 @@
             
         }
         else if(x > 623 && x < 637 && y > 645 && y < 657 ) {
-        	 if (forward >= 10)  forward = 8;
+             if (forward >= 10)  forward = 8;
              mychart.clearRect (300, 0, 300, 200);
              draw_empty_chart (mychart,canvas_chart,330,0,0.2);
              draw_division_chart (mychart,division[forward],division[forward+1],d+index[forward]);
@@ -1581,12 +1581,14 @@
     function draw ()
     {   
         var canvas_info = document.getElementById('canvas_info');
-        var myinfo = canvas_info.getContext('2d'); 
-         
+        var myinfo = canvas_info.getContext('2d');
+        canvas_info.onselectstart  = function () { return false; }        
+  
         var canvas_chart = document.getElementById('canvas_chart');
         var mychart = canvas_chart.getContext('2d');
         mychart.clearRect (0, 0, canvas_chart.width, canvas_chart.height);
-        
+        canvas_chart.onselectstart = function () { return false; }
+
         draw_info (myinfo,canvas_info);
         
         draw_empty_chart (mychart,canvas_chart,0,0,0.2);
