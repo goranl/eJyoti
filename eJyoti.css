@@ -233,27 +233,35 @@ button:active {
 }
 
 .ribbon {
-  background-color: #FF9933;
-  overflow: hidden;
-  position: fixed;
-  left: -2.0em;
-  bottom: 2em;
-  -moz-transform: rotate(45deg);
-  -webkit-transform: rotate(45deg);
-  -moz-box-shadow: 0 0 2em #fff;
-  -webkit-box-shadow: 0 0 2em #fff;
+    background-color: #FF9933;
+    overflow: hidden;
+    position: fixed;
+    left: -2.0em;
+    bottom: 2em;
+    -moz-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    -moz-box-shadow: 0 0 2em #fff;
+    -webkit-box-shadow: 0 0 2em #fff;
 }
 
 .ribbon a {
-  border: 1.5px solid #fff;
-  color: #fff;
-  display: block;
-  font:  80% Arial, sans-serif;
-  margin: 0.1em 0 0.1em 0;
-  padding: 0.1em 2em;
-  text-align: center;
-  text-decoration: none;
-  text-shadow: 0 0 0.1em #fff;
+    border: 1.5px solid #fff;
+    color: #fff;
+    display: block;
+    font:  80% Arial, sans-serif;
+    margin: 0.1em 0 0.1em 0;
+    padding: 0.1em 2em;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: 0 0 0.1em #fff;
+}
+
+.disable_select {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+     user-select: none;
 }
 
 footer {

@@ -29,7 +29,7 @@
         eJyoti
 </header>
     
-<article>
+<article class="disable_select">
     <h1>BIRTH CHART</h1>
     <canvas id="canvas_info" tabindex="0" width="600" height="190">[ Information ]</canvas>
 </article>
@@ -72,12 +72,12 @@
    </form>
 </section>
 
-<article>
+<article class="disable_select">
     <h1>BIRTH CHART</h1>
     <canvas id="canvas_chart" tabindex="1" width="600" height="210">[ Rasi D1 and Navamsa D9 ]</canvas>
     <!-- 
         <p>
-        Rasi ( D1 ) and Navamsa ( D9 )
+             Rasi ( D1 ) and Navamsa ( D9 )
         </p> 
     -->
 </article>
@@ -1542,7 +1542,8 @@
         var x, y,d="D";
         var canvas_chart = document.getElementById('canvas_chart');
         var mychart = canvas_chart.getContext('2d');
-        
+        e.preventDefault();
+ 
         if (e.layerX || e.layerX == 0) { 
             x = e.layerX;
             y = e.layerY;
@@ -1552,7 +1553,7 @@
             y = e.offsetY;
         }
         
-        if (x > 603 && x < 621 && y > 645 && y < 657 ) {
+        if (x > 600 && x < 621 && y > 645 && y < 657 ) {
              if (forward <= 0)  forward = 2;
              mychart.clearRect (300, 0, 300, 200);
              draw_empty_chart (mychart,canvas_chart,330,0,0.2);
@@ -1560,7 +1561,7 @@
              forward -= 2; 
             
         }
-        else if(x > 623 && x < 637 && y > 645 && y < 657 ) {
+        else if(x > 622 && x < 645 && y > 645 && y < 657 ) {
              if (forward >= 10)  forward = 8;
              mychart.clearRect (300, 0, 300, 200);
              draw_empty_chart (mychart,canvas_chart,330,0,0.2);
@@ -1661,15 +1662,24 @@
      
         canvas.clearRect (0, 0, canvas_info.width, canvas_info.height);
             
-        canvas_info.addEventListener('keydown',     onkeydown,   true);
-        canvas_info.addEventListener("mousedown",   onmousedown, false);
-        canvas_info.addEventListener('mouseup',     function(e)  { });
-        canvas_info.addEventListener('mousewheel',  function(e)  { });
-        canvas_info.addEventListener('mousemove',   function(e)  { });
-        canvas_info.addEventListener('contextmenu', function(e)  {
+        canvas_info.addEventListener('keydown',    onkeydown,   true);
+        canvas_info.addEventListener("mousedown",  onmousedown, false);
+        canvas_info.addEventListener('mouseup',    function(e)  { });
+        canvas_info.addEventListener('mousewheel', function(e)  { });
+        canvas_info.addEventListener('mousemove',  function(e)  { });
+        canvas_info.addEventListener('contextmenu',function(e)  {
            e.preventDefault();
         });
-        
+        canvas_info.addEventListener('touchstart', function(e)  {
+           e.preventDefault();
+        });
+        canvas_info.addEventListener('touchmove',  function(e)  {
+           e.preventDefault();
+        });
+        canvas_info.addEventListener('touchend',   function(e)  {
+           e.preventDefault();
+        });
+ 
         var y=10;
         for (var i=0; i<=9; i++) {
             canvas.fillText(mygrahas[i].name, 2, y);
@@ -1847,7 +1857,7 @@
         canvas.textAlign = 'center';
         canvas.fillText(d, pos[0]+xoffset, 105);
         canvas.textAlign = 'left';
-        canvas.fillText("-     +",xoffset, 209);
+        canvas.fillText("-       +",xoffset, 209);
     }
     
     function draw_smile (canvas) 
