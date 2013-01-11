@@ -749,7 +749,7 @@
             var a = Math.floor(0.01 * jy);
             j += 2 - a + Math.floor(0.25 * a);
         }
-        var df = time.getHours() / 24.0 - 0.5;
+        var df = (time.getHours()-tz) / 24.0 - 0.5;
         if (df < 0.0) { df += 1.0; --j; }
         var fc = df + (time.getMinutes() + 0 / 60.0) / 60.0 / 24.0;
         var jd = Math.floor(((j + fc) * 10000000));
