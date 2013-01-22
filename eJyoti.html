@@ -6,7 +6,7 @@
 <html lang="en">
     <head>
         <title>eJyoti</title>
-        <link rel="stylesheet" href="eJyoti.css">
+        <link  rel="stylesheet" href="eJyoti.css">
         <meta name="description"   content="jyotish birth chart">
         <meta name="keywords"    content="jyotish,vedic astrology,birth chart,rasi,navamsa,astronomy">
         <meta name="viewport"  content="width=device-width, initial-scale=1.0, user-scalable=0">
@@ -31,7 +31,7 @@
     
 <article class="disable_select">
     <h1>BIRTH CHART</h1>
-    <canvas id="canvas_info" tabindex="0" width="600" height="190">[ Information ]</canvas>
+    <canvas id="canvas_info" tabindex="0" width="625" height="190">[ Information ]</canvas>
 </article>
 
 <section>
@@ -41,13 +41,12 @@
         <input type="text" id="name" name="name" placeholder="Name" value="" min="1" max="15">
 
         <label>Date:</label>
-        <input type="date" id="date" name="date" placeholder="1900/01/31" min="1000/01/01" max="6100/01/31" 
+        <input type="date" id="date" name="date" placeholder="1900-02-31" min="0000-01-01" max="6000-01-31" 
         pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01]{10,10}" value=""
         required>
         
-        <DIV id="mtime" title="Time format: 23:59">Time:</DIV>
-        <input type="time" id="time" name="time" placeholder="23:59:59" value="" step="10"
-        pattern="[0-9]{2}:(0[1-9]|1[012]):(0[1-9]|1[0-9]|2[0-9]|3[01]{8,8}"  
+        <DIV id="mtime" title="Time format: 23:59 | 7:59 ">Time:</DIV>
+        <input type="time" id="time" name="time" placeholder="23:59" value="" step="10"
         required>
         
         <DIV id="mtz" title="Time Zone to GMT +|-&#013;East of GMT: +, and for West of GMT: -&#013;(decimal)"
@@ -66,7 +65,7 @@
         <input type="text" id="lon" name="lon" placeholder="15E58" value=""
         required>
         
-        <br>
+        <br> 
         
         <button type="button" id="button" onclick="generate()">Generate</button>
    </form>
@@ -74,7 +73,7 @@
 
 <article class="disable_select">
     <h1>BIRTH CHART</h1>
-    <canvas id="canvas_chart" tabindex="1" width="600" height="210">[ Rasi D1 and Navamsa D9 ]</canvas>
+    <canvas id="canvas_chart" tabindex="1" width="625" height="210">[ Rasi D1 and Navamsa D9 ]</canvas>
     <!-- 
         <p>
              Rasi ( D1 ) and Navamsa ( D9 )
@@ -130,13 +129,13 @@
        
     /* Planets or Grahas */
     var AS    = 0;  /* Ascendant or Lagna  */
-    var SU    = 1;  /* Sun     Surya      (Leo)                  South 7th          Sunday     6Y */
-    var MO    = 2;  /* Moon    Chandra    (Cancer)               North 7th          Monday    10Y */
-    var MA    = 3;  /* Mars    Mangala    (Aries+, Scorpio)      South 4th,7th,8th  Tuesday    7Y */
-    var ME    = 4;  /* Mercury Budha      (Virgo+, Gemini)       East  7th          Wednesday 17Y */
-    var JU    = 5;  /* Jupiter Brihaspati (Sagittarius+, Pisces) East  5th,7th,9th  Thursday  16Y */
-    var VE    = 6;  /* Venus   Shukra     (Libra+, Taurus)       North 7th          Friday    20Y */
-    var SA    = 7;  /* Saturn  Shani      (Aquarius+,Capricorn)  West  3rd,7th,10th Saturday  19Y */
+    var SU    = 1;  /* Sun     Surya      (Leo)                  South 7th          Sunday     6Y 29D     */
+    var MO    = 2;  /* Moon    Chandra    (Cancer)               North 7th          Monday    10Y 2D      */
+    var MA    = 3;  /* Mars    Mangala    (Aries+, Scorpio)      South 4th,7th,8th  Tuesday    7Y 2M5D    */
+    var ME    = 4;  /* Mercury Budha      (Virgo+, Gemini)       East  7th          Wednesday 17Y 2M9D    */
+    var JU    = 5;  /* Jupiter Brihaspati (Sagittarius+, Pisces) East  5th,7th,9th  Thursday  16Y 1Y1M11D */
+    var VE    = 6;  /* Venus   Shukra     (Libra+, Taurus)       North 7th          Friday    20Y 25D     */
+    var SA    = 7;  /* Saturn  Shani      (Aquarius+,Capricorn)  West  3rd,7th,10th Saturday  19Y 3Y1M24D */
     var RA    = 8;  /* Rahu    5th, 7th, 9th 18Y */
     var KE    = 9;  /* Ketu    5th, 7th, 9th  7Y */
     
@@ -247,8 +246,8 @@
     function generate () 
     {
         parse_input_data();
-        calc_planets_position();
-        draw();
+        calc_position(false);
+        draw(false);
     }
     
     function parse_input_data ()
@@ -263,22 +262,41 @@
     
     function parse_date (input) 
     {
+        /* Date format: 1901-02-31 */
         date  = 0;
         date  = new Date(input);
     }
     
-    function parse_time (input) 
+    function parse_time (input)
     {
+        /* Time format: 23:59 | 7:59 | 07:59  */
         time = 0;
         time = new Date();
-        var tmp = input.match(/(\d+)(:(\d\d))/);
+        
+        var tmp = input.replace(/\s+/g,'');
+        tmp     = tmp.match(/(\d{1,2})(:(\d\d))/);
+            
+        if (tmp[1] < 10) tmp[1] = parseInt(tmp[1], 10);//.replace(/^0+/, '');
+        if (tmp[3] < 10) tmp[3] = parseInt(tmp[3], 10);//.replace(/^0+/, '');
+       
         time.setHours(parseInt(tmp[1]) + ((parseInt(tmp[1]) < 12 && tmp[4] ) ? 12 : 0));
-        time.setMinutes((parseInt(tmp[3]) || 0));
-        time.setSeconds(0); 
+        time.setMinutes(parseInt(tmp[3]) || 0);
+        time.setSeconds(parseInt(0)); 
+        
+        if (parseInt(tmp[1]) >= 24 || parseInt(tmp[3]) > 59 ||
+              (parseInt(tmp[1]) == 00 && parseInt(tmp[3]) == 00)) {
+        time.setHours(parseInt(0));
+        time.setMinutes(parseInt(1));
+        document.getElementById('time').value = '00:01';
+        }
     }
     
     function parse_latitude (input) 
     {
+        /*  North or South, range between 0 and 90 degrees 
+         *  Format: 45N48
+         */
+
         var tmp = input.replace(/\s+/g,"");
         if (tmp.indexOf("N") !=-1) {
             lattmp=tmp.split("N");
@@ -293,6 +311,10 @@
     
     function parse_longitude (input) 
     {
+        /*  East or West, range between 0 and 180 degrees 
+         *  Format: 15E58
+         */
+
         var tmp = input.replace(/\s+/g,"");
         if (tmp.indexOf("W") !=-1) {
             lontmp=tmp.split("W");
@@ -307,7 +329,7 @@
     
     function myplanets ( name,index,ra,ruler,r_index,aspect,day,
                          happy_zodiac,happy_house,sad_zodiac,sad_house,
-                         good_friend, bad_friend) 
+                         good_friend, bad_friend,transitdeg) 
     {
         this.name    = name;
         this.index   = index;
@@ -322,6 +344,7 @@
         this.sad_house    = sad_house;
         this.good_friend  = good_friend;
         this.bad_friend   = bad_friend;
+        this.transitdeg   = transitdeg;
         this.house     = "";
         this.zodiac    = "";
         this.degree    = "";
@@ -353,12 +376,12 @@
         this.dwaddeg   = ""; /* Dwadashamsa degree        */
         this.dwadzn    = ""; /* Dwadashamsa zodiac index  */
         this.getra     = function()  { return this.ra;     }
-        this.getzn     = function()  { return this.rasizn; }
         this.getzodiac = function()  { return this.zodiac; }
         this.getdegree = function()  { return this.degree; }
-        this.compute   = function()  
+        this.compute   = function(transit)  
         {
-            if (this.ra < 0) { this.ra += 360; }
+            if (!transit) this.ra = mod360(this.ra);
+            else          this.ra = mod360(this.transitdeg);
             // D2 - parasara traditional, 4 and 5
             this.horadeg   = ((this.ra-15.0)-60.0*Math.floor((this.ra-15.0)*(1.0/60.0))+90);
             this.horazn    = calc_zodiac(this.horadeg);
@@ -379,71 +402,62 @@
             
             if (this.ra>=0 && this.ra<=30)        {
                 this.zodiac="Aries";
-                this.rasizn=1;this.range="0-30";
+                this.rasizn=1; this.range="000-030";
                 this.degree=(this.ra-0);
             }
             else if (this.ra>30  && this.ra<=60)  {
                 this.zodiac="Taurus";
-                this.rasizn=2;
-                this.range="30-60";
+                this.rasizn=2; this.range="030-060";
                 this.degree=(this.ra-30);
             }
             else if (this.ra>60  && this.ra<=90)  {
                 this.zodiac="Gemini";
-                this.rasizn=3;
-                this.range="60-90";
+                this.rasizn=3; this.range="060-090";
                 this.degree=(this.ra-60);
             }
             else if (this.ra>90  && this.ra<=120) {
                 this.zodiac="Cancer";
-                this.rasizn=4;this.range="90-120";
+                this.rasizn=4; this.range="090-120";
                 this.degree=(this.ra-90);
             }
             else if (this.ra>120 && this.ra<=150) {
                 this.zodiac="Leo";
-                this.rasizn=5;
-                this.range="120-150";
+                this.rasizn=5; this.range="120-150";
                 this.degree=(this.ra-120);
             }
             else if (this.ra>150 && this.ra<=180) {
                 this.zodiac="Virgo";
-                this.rasizn=6;
-                this.range="150-180";
+                this.rasizn=6; this.range="150-180";
                 this.degree=(this.ra-150);
             }
             else if (this.ra>180 && this.ra<=210) {
                 this.zodiac="Libra";
-                this.rasizn=7;this.range="180-210";
+                this.rasizn=7; this.range="180-210";
                 this.degree=(this.ra-180);
             }
             else if (this.ra>210 && this.ra<=240) {
                 this.zodiac="Scorpio";
-                this.rasizn=8;
-                this.range="210-240";
+                this.rasizn=8; this.range="210-240";
                 this.degree=(this.ra-210);
             }
             else if (this.ra>240 && this.ra<=270) {
                 this.zodiac="Sagittarius";
-                this.rasizn=9;
-                this.range="240-270";
+                this.rasizn=9; this.range="240-270";
                 this.degree=(this.ra-240);
             }
             else if (this.ra>270 && this.ra<=300) {
                 this.zodiac="Capricorn";
-                this.rasizn=10;
-                this.range="270-300";
+                this.rasizn=10; this.range="270-300";
                 this.degree=(this.ra-270);
             }
             else if (this.ra>300 && this.ra<=330) {
                 this.zodiac="Aquarius";
-                this.rasizn=11;
-                this.range="300-330";
+                this.rasizn=11; this.range="300-330";
                 this.degree=(this.ra-300);
             }
             else if (this.ra>330 && this.ra<=360) {
                 this.zodiac="Pisces";
-                this.rasizn=12;
-                this.range="330-360";
+                this.rasizn=12; this.range="330-360";
                 this.degree=(this.ra-330);
             }  
             
@@ -454,8 +468,8 @@
         this.compute_division_zodiac = function()
         {
             // D1
-            var ay = calc_ayanamsa();
-            var as = calc_ascendant()-ay;
+            var ay = calc_ayanamsa(false);
+            var as = calc_ascendant(time.getHours(),time.getMinutes(),false)-ay;
             var x=1;
             for (var i=0; i<MAXZOD; i++)  {
                 if (calc_zodiac(as)+i>12) { myrashis[i]=x; x++;            }
@@ -543,13 +557,11 @@
         }
     };
     
-    function calc_zodiac (deg)
+    function calc_zodiac (_deg)
     {
         var zodiac;
-        if (deg < 0) { deg += 360; } 
-        else if (deg > 360 ) {
-            deg = (deg-360.0*Math.floor(deg*(1.0/360.0)));
-        }
+        var deg = mod360(_deg);
+        
         if (deg>=0 && deg<=30)        {zodiac=Aries;      }
         else if (deg>30  && deg<=60)  {zodiac=Taurus;     }
         else if (deg>60  && deg<=90)  {zodiac=Gemini;     }
@@ -606,35 +618,35 @@
     
     function calc_nakshatra (deg,n)
     {
-        var nakshatra, lord, pada=0;
+        var nakshatra, lord, pada=0, sdeg=0;
         if      (deg < 0)     {  deg += 360; }  
-        if      (deg>=0.0000  && deg<=13.3333)  {nakshatra="Ashvini";  lord="Ke";pada=(deg -   0.0000);}
-        else if (deg>13.3333  && deg<=26.6667)  {nakshatra="Bharani";  lord="Ve";pada=(deg -  13.3333);}
-        else if (deg>26.6667  && deg<=40.0000)  {nakshatra="Krittika"; lord="Su";pada=(deg -  26.6667);}
-        else if (deg>40.0000  && deg<=53.3333)  {nakshatra="Rohini";   lord="Mo";pada=(deg -  40.0000);}
-        else if (deg>53.3333  && deg<=66.6667)  {nakshatra="Mrigashir";lord="Ma";pada=(deg -  53.3333);}
-        else if (deg>66.6667  && deg<=80.0000)  {nakshatra="Ardra";    lord="Ra";pada=(deg -  66.6667);}
-        else if (deg>80.0000  && deg<=93.3333)  {nakshatra="Punarvasu";lord="Ju";pada=(deg -  80.0000);}
-        else if (deg>93.3333  && deg<=106.6667) {nakshatra="Pushya";   lord="Sa";pada=(deg -  93.3333);}
-        else if (deg>106.6667 && deg<=120.0000) {nakshatra="Ashlesha"; lord="Me";pada=(deg - 106.6667);}
-        else if (deg>120.0000 && deg<=133.3333) {nakshatra="Magha";    lord="Ke";pada=(deg - 120.0000);}
-        else if (deg>133.3333 && deg<=146.6667) {nakshatra="P.Phalg";  lord="Ve";pada=(deg - 133.3333);}
-        else if (deg>146.6667 && deg<=160.0000) {nakshatra="U.Phalg";  lord="Su";pada=(deg - 146.6667);}
-        else if (deg>160.0000 && deg<=173.3333) {nakshatra="Hasta";    lord="Mo";pada=(deg - 160.0000);}
-        else if (deg>173.3333 && deg<=186.6667) {nakshatra="Chitra";   lord="Ma";pada=(deg - 173.3333);}
-        else if (deg>186.6667 && deg<=200.0000) {nakshatra="Svati";    lord="Ra";pada=(deg - 186.6667);}
-        else if (deg>200.0000 && deg<=213.3333) {nakshatra="Vishakha"; lord="Ju";pada=(deg - 200.0000);}
-        else if (deg>213.3333 && deg<=226.6667) {nakshatra="Anuradha"; lord="Sa";pada=(deg - 213.3333);}
-        else if (deg>226.6667 && deg<=240.0000) {nakshatra="Jyeshtha"; lord="Me";pada=(deg - 226.6667);}
-        else if (deg>240.0000 && deg<=253.3333) {nakshatra="Mula";     lord="Ke";pada=(deg - 240.0000);}
-        else if (deg>253.3333 && deg<=266.6667) {nakshatra="P.Shadha"; lord="Ve";pada=(deg - 253.3333);}
-        else if (deg>266.6667 && deg<=280.0000) {nakshatra="U.Shadha"; lord="Su";pada=(deg - 266.6667);}
-        else if (deg>280.0000 && deg<=293.3333) {nakshatra="Sravana";  lord="Mo";pada=(deg - 280.0000);}
-        else if (deg>293.3333 && deg<=306.6667) {nakshatra="Dhanista"; lord="Ma";pada=(deg - 293.3333);}
-        else if (deg>306.6667 && deg<=320.0000) {nakshatra="Shatabhi"; lord="Ra";pada=(deg - 306.6667);}
-        else if (deg>320.0000 && deg<=333.3333) {nakshatra="P.Bhadra"; lord="Ju";pada=(deg - 320.0000);}
-        else if (deg>333.3333 && deg<=346.6667) {nakshatra="U.Bhadra"; lord="Sa";pada=(deg - 333.3333);}
-        else if (deg>346.6667 && deg<=360.0000) {nakshatra="Revati";   lord="Me";pada=(deg - 346.6667);}
+        if      (deg>=0.0000  && deg<=13.3333)  {nakshatra="Ashvini";  lord="Ke";pada=(deg -   0.0000);sdeg=  0.0000;}
+        else if (deg>13.3333  && deg<=26.6667)  {nakshatra="Bharani";  lord="Ve";pada=(deg -  13.3333);sdeg= 13.3333;}
+        else if (deg>26.6667  && deg<=40.0000)  {nakshatra="Krittika"; lord="Su";pada=(deg -  26.6667);sdeg= 26.6667;}
+        else if (deg>40.0000  && deg<=53.3333)  {nakshatra="Rohini";   lord="Mo";pada=(deg -  40.0000);sdeg= 40.0000;}
+        else if (deg>53.3333  && deg<=66.6667)  {nakshatra="Mrigashir";lord="Ma";pada=(deg -  53.3333);sdeg= 53.3333;}
+        else if (deg>66.6667  && deg<=80.0000)  {nakshatra="Ardra";    lord="Ra";pada=(deg -  66.6667);sdeg= 66.6667;}
+        else if (deg>80.0000  && deg<=93.3333)  {nakshatra="Punarvasu";lord="Ju";pada=(deg -  80.0000);sdeg= 80.0000;}
+        else if (deg>93.3333  && deg<=106.6667) {nakshatra="Pushya";   lord="Sa";pada=(deg -  93.3333);sdeg= 93.3333;}
+        else if (deg>106.6667 && deg<=120.0000) {nakshatra="Ashlesha"; lord="Me";pada=(deg - 106.6667);sdeg=106.6667;}
+        else if (deg>120.0000 && deg<=133.3333) {nakshatra="Magha";    lord="Ke";pada=(deg - 120.0000);sdeg=120.0000;}
+        else if (deg>133.3333 && deg<=146.6667) {nakshatra="P.Phalg";  lord="Ve";pada=(deg - 133.3333);sdeg=133.3333;}
+        else if (deg>146.6667 && deg<=160.0000) {nakshatra="U.Phalg";  lord="Su";pada=(deg - 146.6667);sdeg=146.6667;}
+        else if (deg>160.0000 && deg<=173.3333) {nakshatra="Hasta";    lord="Mo";pada=(deg - 160.0000);sdeg=160.0000;}
+        else if (deg>173.3333 && deg<=186.6667) {nakshatra="Chitra";   lord="Ma";pada=(deg - 173.3333);sdeg=173.3333;}
+        else if (deg>186.6667 && deg<=200.0000) {nakshatra="Svati";    lord="Ra";pada=(deg - 186.6667);sdeg=186.6667;}
+        else if (deg>200.0000 && deg<=213.3333) {nakshatra="Vishakha"; lord="Ju";pada=(deg - 200.0000);sdeg=200.0000;}
+        else if (deg>213.3333 && deg<=226.6667) {nakshatra="Anuradha"; lord="Sa";pada=(deg - 213.3333);sdeg=213.3333;}
+        else if (deg>226.6667 && deg<=240.0000) {nakshatra="Jyeshtha"; lord="Me";pada=(deg - 226.6667);sdeg=226.6667;}
+        else if (deg>240.0000 && deg<=253.3333) {nakshatra="Mula";     lord="Ke";pada=(deg - 240.0000);sdeg=240.0000;}
+        else if (deg>253.3333 && deg<=266.6667) {nakshatra="P.Shadha"; lord="Ve";pada=(deg - 253.3333);sdeg=253.3333;}
+        else if (deg>266.6667 && deg<=280.0000) {nakshatra="U.Shadha"; lord="Su";pada=(deg - 266.6667);sdeg=266.6667;}
+        else if (deg>280.0000 && deg<=293.3333) {nakshatra="Sravana";  lord="Mo";pada=(deg - 280.0000);sdeg=280.0000;}
+        else if (deg>293.3333 && deg<=306.6667) {nakshatra="Dhanista"; lord="Ma";pada=(deg - 293.3333);sdeg=293.3333;}
+        else if (deg>306.6667 && deg<=320.0000) {nakshatra="Shatabhi"; lord="Ra";pada=(deg - 306.6667);sdeg=306.6667;}
+        else if (deg>320.0000 && deg<=333.3333) {nakshatra="P.Bhadra"; lord="Ju";pada=(deg - 320.0000);sdeg=320.0000;}
+        else if (deg>333.3333 && deg<=346.6667) {nakshatra="U.Bhadra"; lord="Sa";pada=(deg - 333.3333);sdeg=333.3333;}
+        else if (deg>346.6667 && deg<=360.0000) {nakshatra="Revati";   lord="Me";pada=(deg - 346.6667);sdeg=346.6667;}
         
         if      (n == 1)  return nakshatra;
         else if (n == 2)  return lord;
@@ -648,36 +660,68 @@
             if (pada > 9.999999  && pada <=13.400000)
             return 4;
         }
+        else if (n == 4)  {
+            return sdeg;
+        }
     }
     
     function calc_planets_position () 
     {
-        dn     = calc_day_number();
-        var ay = calc_ayanamsa();
-        var as = calc_ascendant()-ay;
+        var today = new Date();
+        dn = calc_day_number(time.getHours(),time.getMinutes(),false);
         
-        mygrahas[0] = new myplanets("As",AS,as,"","","","","","","","","","");
+        var jd    = calc_julian_date(time.getHours(),time.getMinutes(),tz,false);
+        var jdnow = calc_julian_date(today.getHours(),today.getMinutes(),tz,true);
         
-        mygrahas[1] = new myplanets("Su",SU,calc_vsop87(1)-ay,"Leo",Leo,"7","Sunday",
-                          "Le,Ar","1,5,9,10","Li","4,6,7,8,12","Mo,Ma,Ju","Sa,Ve");            //calc_ra(0) //0
-        mygrahas[2] = new myplanets("Mo",MO,calc_moon_positionIII()-ay,"Cancer",Cancer,"7","Monday",
-                          "Ca,Ta","4,7,9,11,12","Sc,Cp","2,3,6,8","Su,Me"," - ");
-        mygrahas[3] = new myplanets("Ma",MA,calc_vsop87(3)-ay,"Aries",Aries,"4,7,8","Tuesday",
-                          "Ar,Sc,Cp","1,3,5,8,10,11","Ca,Li,Pi","2,4,6,12","Su,Mo,Ju","Me");                //1
-        mygrahas[4] = new myplanets("Me",ME,calc_vsop87(4)-ay,"Virgo",Virgo,"7","Wednesday",
-                          "Vi,Ge","1,3,5,6,7,10,11","Sa,Pi","2,4,8,9,12","Ve,Su","Me");                     //2
-        mygrahas[5] = new myplanets("Ju",JU,calc_vsop87(5)-ay,"Sagittarius",Sagittarius,"5,7,9","Thursday",
-                          "Ca","1,4,5,7,9,10,2,11","Cp","2,11","Su,Mo,Ma","Ve,Me");                         //3
-        mygrahas[6] = new myplanets("Ve",VE,calc_vsop87(6)-ay,"Libra",Libra,"7","Friday",
-                          "Li,Ta,Pi","1,2,4,5,7.9.11,12","Sc,Vi","3,6,8,10","Sa,Me","Su,Mo");               //4
-        mygrahas[7] = new myplanets("Sa",SA,calc_vsop87(7)-ay,"Aquarius",Aquarius,"3,7,10","Saturday",
-                          "Li,Cp,Aq","3,6,7,10,11","Ar,Ca","4,5,8,9,12","Me,Ve","Su,Mo,Ma");                //5
-        mygrahas[8] = new myplanets("Ra",RA,calc_moon_acending_node(),"","","5,7,9","",
-                          "Ta,Ge,Vi,Li","1,2,3,5,10,11","Sg,Ar,Le,Pi","4,6,7,8,9,12"," - "," - ");
-        mygrahas[9] = new myplanets("Ke",KE,mod360(calc_moon_acending_node()+180),"","","5,7,9","",
-                          "Sc,Pi,Sg,Ar","4,6,8,9,12","Ta,Ge,Vi,Li","1,2,3,5,7,10,11"," - "," - ");
+        var ay    = calc_ayanamsa(false);
+        var aynow = calc_ayanamsa(true);
         
-        for (var i=0; i<=9; i++) {  mygrahas[i].compute(); }
+        var as    = calc_ascendant(time.getHours(),time.getMinutes(),false)-ay;
+        var asnow = calc_ascendant(today.getHours(),today.getMinutes(),true)-aynow;
+        
+        mygrahas[0] = new myplanets("As",AS,as,"","","","","","","","","","",asnow);
+        
+        mygrahas[1] = new myplanets("Su",SU,calc_vsop87(1,jd)-ay,"Leo",Leo,"7th","Sunday",
+                          "Le,Ar","1,5,9,10","Li","4,6,7,8,12","Mo,Ma,Ju","Sa,Ve",
+                          calc_vsop87(1,jdnow)-aynow);//calc_ra(0) //0
+        
+        mygrahas[2] = new myplanets("Mo",MO,calc_moon_positionIII(false)-ay,"Cancer",Cancer,"7th",
+                          "Monday","Ca,Ta","4,7,9,11,12","Sc,Cp","2,3,6,8","Su,Me"," - ",
+                          calc_moon_positionIII(true)-aynow);
+        
+        mygrahas[3] = new myplanets("Ma",MA,calc_vsop87(3,jd)-ay,"Aries",Aries,"4,7,8th",
+                          "Tuesday","Ar,Sc,Cp","1,3,5,8,10,11","Ca,Li,Pi","2,4,6,12","Su,Mo,Ju","Me",
+                          calc_vsop87(3,jdnow)-aynow);  //1
+        
+        mygrahas[4] = new myplanets("Me",ME,calc_vsop87(4,jd)-ay,"Virgo",Virgo,"7th",
+                          "Wednesday","Vi,Ge","1,3,5,6,7,10,11","Sa,Pi","2,4,8,9,12","Ve,Su","Mo",
+                          calc_vsop87(4,jdnow)-aynow);  //2
+        
+        mygrahas[5] = new myplanets("Ju",JU,calc_vsop87(5,jd)-ay,"Sagittarius",Sagittarius,"5,7,9th",
+                          "Thursday","Ca","1,4,5,7,9,10,2,11","Cp","2,11","Su,Mo,Ma","Ve,Me",
+                          calc_vsop87(5,jdnow)-aynow);  //3
+        
+        mygrahas[6] = new myplanets("Ve",VE,calc_vsop87(6,jd)-ay,"Libra",Libra,"7th",
+                          "Friday","Li,Ta,Pi","1,2,4,5,7.9.11,12","Sc,Vi","3,6,8,10","Sa,Me","Su,Mo",
+                          calc_vsop87(6,jdnow)-aynow);  //4
+        
+        mygrahas[7] = new myplanets("Sa",SA,calc_vsop87(7,jd)-ay,"Aquarius",Aquarius,"3,7,10th",
+                          "Saturday","Li,Cp,Aq","3,6,7,10,11","Ar,Ca","4,5,8,9,12","Me,Ve","Su,Mo,Ma",
+                          calc_vsop87(7,jdnow)-aynow);  //5
+        
+        mygrahas[8] = new myplanets("Ra",RA,calc_moon_acending_node(false),"","","5,7,9th","",
+                          "Ta,Ge,Vi,Li","1,2,3,5,10,11","Sg,Ar,Le,Pi","4,6,7,8,9,12"," - "," - ",
+                          calc_moon_acending_node(true));
+        
+        mygrahas[9] = new myplanets("Ke",KE,mod360(calc_moon_acending_node(false)+180),"","","5,7,9th","",
+                          "Sc,Pi,Sg,Ar","4,6,8,9,12","Ta,Ge,Vi,Li","1,2,3,5,7,10,11"," - "," - ",
+                          calc_moon_acending_node(true)+180);
+    }
+    
+    function calc_position (transit)
+    {   
+        calc_planets_position();
+        for (var i=0; i<=9; i++) {  mygrahas[i].compute(transit); }
     }
         
     function elements ()
@@ -685,6 +729,7 @@
        /*    http://ssd.jpl.nasa.gov
         *    http://spaceflight.nasa.gov/realdata/elements
         */
+
         a = parseFloat("0");        /*   semi-major axis [AU]       */
         e = parseFloat("0");        /*   eccentricity of orbit      */
         i = parseFloat("0");        /*   inclination of orbit [deg] */
@@ -693,54 +738,58 @@
         L = parseFloat("0");        /*   mean longitude [deg]                  */
     }
     
-    function calc_day_number ()
+    function calc_day_number (hours,minutes,transit)
     {   
         /*  day number to/from J2000 */
-        
-        /*  //  return integer      
-            var yy = date.getFullYear();
-            var mm = date.getMonth()+1;
-            var dd = date.getDate();
-        
-            if (mm < 3) { yy -= 1; mm += 12; }
-            var a = Math.floor (yy / 100);
-            var b = 2 - a + Math.floor (a / 4);
-            var j = Math.floor (365.25 * yy) + Math.floor (30.6001 * (mm+1)) + dd + 1720994.5 + b;
-            var dn =  j - 2451543.5; 
-            return dn;
-        */
-        
-        /*  var h = (time.getHours()-tz) + time.getMinutes()/60;
-            var j = 367*date.getFullYear() 
-                - Math.floor(7*(date.getFullYear()+Math.floor(((date.getMonth()+1)+9)/12))/4) 
-                + Math.floor(275*(date.getMonth()+1)/9) + (date.getDate()) - 730531.5 + h/24;
-        
-            return j;
-        */
        
-        var yy = date.getFullYear();
-        var mm = date.getMonth()+1;
-        var dd = date.getDate();
+        var today = new Date(),yy,mm,dd;
+        if (!transit) {
+            yy = date.getFullYear();
+            mm = date.getMonth()+1;
+            dd = date.getDate();
+        }
+        else {
+            yy = today.getFullYear();
+            mm = today.getMonth()+1;
+            dd = today.getDate();
+        }   
         if (mm < 3) { yy -= 1; mm += 12; }
-        var a  = Math.floor(yy/100);
-        var b  = 2 - a + Math.floor(a/4);
+        
+        if (yy*10000+mm*100+dd > 15821004) { // 15821015
+            var a = Math.floor(0.01 * yy);
+            var b = 2 - a + Math.floor(0.25 * a);
+        }
+        else {
+            var a = Math.floor(0.01 * yy);
+            var b = 0*(2 - a + Math.floor(0.25 * a));
+        }
+        
         var c  = Math.floor(365.25*yy);
         var d  = Math.floor(30.6001*(mm+1));
 
-        return (b + c + d - 730550.5 + dd + (((time.getHours()-tz)) + time.getMinutes()/60.0)/24.0);
-        
+        return (b + c + d - 730550.5 + dd + (((hours-tz)) + minutes/60.0)/24.0);
     }
     
-    function calc_julian_date () 
+    function calc_julian_date (hours,minutes,_tz,transit) 
     {   
-        /*   Days since the beginning of the Julian period 
-         *   plus the fraction of the day 
+        /*    Days since the beginning of the Julian period 
+         *    plus dT and the fraction of the day
          */
-        var yy=date.getFullYear();
-        var mm=date.getMonth()+1;
-        var dd=date.getDate();
+
+        var today = new Date(),yy,mm,dd;
+        if (!transit) { 
+            yy=date.getFullYear();
+            mm=date.getMonth()+1;
+            dd=date.getDate();
+        }
+        else {
+            yy=today.getFullYear();
+            mm=today.getMonth()+1;
+            dd=today.getDate();
+        }
         var jy = yy;
         var jm = mm;
+        var df;
         if (mm > 2) { jy = yy; jm++;     } 
         else        { jy--;    jm += 13; }
         
@@ -749,29 +798,64 @@
             var a = Math.floor(0.01 * jy);
             j += 2 - a + Math.floor(0.25 * a);
         }
-        var df = (time.getHours()-tz) / 24.0 - 0.5;
+   
+        df = (hours - _tz) / 24.0 - 0.5; 
         if (df < 0.0) { df += 1.0; --j; }
-        var fc = df + (time.getMinutes() + 0 / 60.0) / 60.0 / 24.0;
+        var fc = df + (minutes + dT(transit) / 60.0) / 60.0 / 24.0;
         var jd = Math.floor(((j + fc) * 10000000));
         if ((((j + fc) * 10000000) - jd) > 0.5) ++jd;
         else jd *= 1.0;
         return (jd * 0.0000001);
     }
-
-    function calc_sideral_time ()
+    
+    function calc_day_of_the_week (transit)
+    { 
+        var jd  = calc_julian_date(time.getHours(),time.getMinutes(),0,transit);
+        var day = (Math.floor(jd + 0.5) + 1) % 7;
+        var str;
+        
+        switch (day) {
+            case 0:
+                str="Sunday";
+                break;
+            case 1:
+                str="Monday";
+                break;
+            case 2:
+                str="Tuesday";         
+                break;
+            case 3:
+                str="Wednesday";                
+                break;
+            case 4:
+                str="Thursday";         
+                break;
+            case 5:  
+                str="Friday";       
+                break;
+            case 6:
+                str="Saturday";         
+                break;
+            default:
+                str="NaN"; 
+        }
+        
+        return str;
+    }
+    
+    function calc_sideral_time (hours,minutes,transit)
     {
         /*   local mean sideral time [deg] 
          *   West longitudes are negative
          */
+
         if (londir == "W")
             lon = -lon;
-  
-        var t = (calc_day_number()/36525.0);
-  
-        var LMST = 280.46061837 + 360.98564736629 * calc_day_number() 
-                 + 0.000387933*t*t - (t*t*t)/38710000 + lon;
-        LMST = (LMST - 360.0 * Math.floor( LMST * (1.0/360.0)));
         
+        var t    = (calc_day_number(hours,minutes,transit)/36525.0);
+        var tt   = t * 36525.0
+        var LMST = mod360(280.46061837 + 360.98564736629 * tt
+                    + 0.000387933*t*t - (t*t*t)/38710000 + lon);
         return LMST;
     }
     
@@ -930,13 +1014,13 @@
                 break;
             default:
                 window.alert(" Have you discovered a new planet :) ");
-            }
+        }
     }
     
-    function calc_vsop87 (planet)
+    function calc_vsop87 (planet,jd)
     {
-        /*  Calculate planetary positions using the high-precision VSOP87 theory 
-         *  constructed by P.Bretagnon and G.Francou [1988] at the Bureau des Longitudes, Paris 
+        /*   Calculate planetary positions using the high-precision VSOP87 theory 
+         *   constructed by P.Bretagnon and G.Francou [1988] at the Bureau des Longitudes, Paris 
          */
         
         var  X=0, Y=1, Z=2;
@@ -945,7 +1029,7 @@
         var  Xa,  Ya,  Za,  Ra;
         
         // number of Julian millenia elapsed from J2000
-        var T = (calc_julian_date()-2451545.0)/365250.0;
+        var T = (jd - 2451545.0)/365250.0;
         
         // calculate heliocentric rectangular coordinates of Earth 
         calc_earth(T);
@@ -1001,9 +1085,10 @@
                 window.alert(" error ;) ");
         }
         
+        // Sun coordinates
         if (planet == SU) { Xe=0; Ye=0; Ze=0; }
         
-        // apparent geocentric ecliptical coordinates 
+        // true geocentric ecliptical coordinates 
         Xa = (Xp - Xe);
         Ya = (Yp - Ye);
         Za = (Zp - Ze);
@@ -1021,7 +1106,7 @@
         var day=date.getDate();
         var jy = year;
         var jm = month;
-        var jh = time.getHours()+time.getMinutes()/60;
+        var jh = time.getHours() - tz + time.getMinutes()/60;
         if (month < 3) { jy -= 1; jm += 12 };      
         if (year*10000+month*100+day > 15821004) {
             var a = Math.floor(0.01 * jy);
@@ -1126,7 +1211,7 @@
     
     function calc_moon_positionII () 
     {
-        var JD =  calc_julian_date() - 2451543.5; 
+        var JD =  calc_julian_date(time.getHours(),time.getMinutes(),tz,false) - 2451543.5; 
      
         /* orbital elements of the Moon */
         var N = mod2pi((125.1228 - 0.0529538083  * JD)*RADS);  
@@ -1240,7 +1325,7 @@
         return ra;
     }
     
-    function calc_moon_positionIII () 
+    function calc_moon_positionIII (transit) 
     {
         /*   Jean Meeus "Astronomical Algorithms" 
          *   High precision calculation of the Moon's geocentric longitude 
@@ -1288,8 +1373,9 @@
         607,596,491,-451,439,422,421,-366,-351,331,315,302,-283,-229,223,223,-220,-220,-185,181,-177,
         176,166,-164,132,-119,115,107];
        
-        var lprime,d,m,mprime,f,a1,a2,a3,e=[],sigmaL=0,sigmaB=0,sigmaR=0,ang;
-        var t = (calc_julian_date() - 2451545.0) / 36525.0;
+        var lprime,d,m,mprime,f,a1,a2,a3,e=[],sigmaL=0,sigmaB=0,sigmaR=0,ang,today=new Date(),t;
+        if (!transit) t=(calc_julian_date(time.getHours(),time.getMinutes(),tz,transit)-2451545.0)/36525.0;
+        else          t=(calc_julian_date(today.getHours(),today.getMinutes(),tz,transit)-2451545.0)/36525.0; 
         var t4 = t*t*t*t;
         var t3 = t*t*t;
         var t2 = t*t;
@@ -1322,8 +1408,8 @@
         
         sigmaL +=   3958.0 * Math.sin(a1) + 1962.0 * Math.sin(lprime - f) + 318.0 * Math.sin(a2);
         sigmaB += - 2235.0 * Math.sin(lprime) + 382.0  * Math.sin(a3) + 175.0 * Math.sin(a1 - f) 
-                  + 175.0 * Math.sin(a1 + f) + 127.0 * Math.sin(lprime - mprime) 
-                  - 115.0 * Math.sin(lprime + mprime);
+                  +  175.0 * Math.sin(a1 + f) + 127.0 * Math.sin(lprime - mprime) 
+                  -  115.0 * Math.sin(lprime + mprime);
         
         l = mod2pi(((lprime*DEGS) + sigmaL / 1000000.0)*RADS)*DEGS;
         
@@ -1353,7 +1439,7 @@
         return eps;
     }
     
-    function dT ()
+    function dT (transit)
     {
         /*  http://eclipse.gsfc.nasa.gov/SEhelp/deltaT.html
          *  
@@ -1361,63 +1447,76 @@
          *  The parameter delta-T (ΔT) is the arithmetic difference,
          *  in seconds, between the two as: ΔT = TD - UT 
          */
-    
-        var y = date.getFullYear() + ((date.getMonth()+1) - 0.5)/12;
-        var c = -0.000012932 * (y - 1955)^2;
+        
+        var today=new Date(),y;
+        if (!transit) y = date.getFullYear()  + ((date.getMonth()+1)  - 0.5)/12;
+        else          y = today.getFullYear() + ((today.getMonth()+1) - 0.5)/12;
+            
+        var c = -0.000012932 * Math.pow((y - 1955),2);
         var dt=0, u=0, t=0;
+        t2 = t*t;
+        t3 = t*t*t;
+        t4 = t*t*t*t;
+        t5 = t4*t;
+        t6 = t5*t;
+        t7 = t6*t;
         
         if (y <= -500) {
             u  = (y - 1820)/100;
-            dt = -20 + 32 * u^2;
+            dt = -20 + 32 * u*u + c;
         }
         else if (y < -500 && y <= 500) {
             u  = y/100;
-            dt = 10583.6 - 1014.41 * u + 33.78311 * u^2 - 5.952053 * u^3
-                  - 0.1798452 * u^4 + 0.022174192 * u^5 + 0.0090316521 * u^6;
+            dt = 10583.6 - 1014.41 * u + 33.78311 * u*u - 5.952053 * u*u*u
+                  - 0.1798452 * u*u*u*u + 0.022174192 * u*u*u*u*u + 0.0090316521 * u*u*u*u*u*u + c;
         }
         else if (y > 500 && y <= 1600) {
             u  = (y - 1000)/100;
-            dt = 1574.2 - 556.01 * u + 71.23472 * u^2 + 0.319781 * u^3
-                 - 0.8503463 * u^4 - 0.005050998 * u^5 + 0.0083572073 * u^6;
+            dt = 1574.2 - 556.01 * u + 71.23472 * u*u + 0.319781 * u*u*u
+                 - 0.8503463 * u*u*u*u - 0.005050998 * u*u*u*u*u + 0.0083572073 * u*u*u*u*u*u + c;
         }
         else if (y > 1600 && y <= 1700) {
             t  = (y - 1600);
-            dt = 120 - 0.9808 * t - 0.01532 * t^2 + t^3 / 7129;
+            dt = 120 - 0.9808 * t - 0.01532 * t2 + t3 / 7129 + c;
         }
         else if (y > 1700 && y <= 1800) {
             t  = (y - 1800);
-            dt = 13.72 - 0.332447 * t + 0.0068612 * t^2 + 0.0041116 * t^3 
-                 - 0.00037436 * t^4 + 0.0000121272 * t^5 - 0.0000001699 * t^6 
-                 + 0.000000000875 * t^7;
+            dt = 13.72 - 0.332447 * t + 0.0068612 * t2 + 0.0041116 * t3 
+                 - 0.00037436 * t4 + 0.0000121272 * t5 - 0.0000001699 * t6 
+                 + 0.000000000875 * t7 + c;
         }
         else if (y > 1860 && y <= 1900) {
             t  = (y - 1860);
-            dt = 7.62 + 0.5737 * t - 0.251754 * t^2 + 0.01680668 * t^3
-                 -0.0004473624 * t^4 + t^5 / 233174;
+            dt = 7.62 + 0.5737 * t - 0.251754 * t2 + 0.01680668 * t3
+                 -0.0004473624 * t4 + t5 / 233174 + c;
         }
         else if (y > 1900 && y <= 1920) {
             t  = (y - 1920);
-            dt = 21.20 + 0.84493*t - 0.076100 * t^2 + 0.0020936 * t^3;
+            dt = 21.20 + 0.84493 * t - 0.076100 * t2 + 0.0020936 * t3 + c;
         }
         else if (y > 1941 && y <= 1961) {
             t  = (y - 1950);
-            dt =  29.07 + 0.407*t - t^2/233 + t^3 / 2547;
+            dt =  29.07 + 0.407 * t - t2 / 233 + t3 / 2547;
         }
         else if (y > 1961 && y <= 1986) {
             t  = (y - 1975);
-            dt = 45.45 + 1.067*t - t^2/260 - t^3 / 718;
+            dt = 45.45 + 1.067 * t - t2 / 260 - t3 / 718;
         }
         else if (y > 1986 && y <= 2005) {
             t  = (y - 2000);
-            dt = 3.86 + 0.3345 * t - 0.060374 * t^2 + 0.0017275 * t^3 
-                 + 0.000651814 * t^4 + 0.00002373599 * t^5;
+            dt = 3.86 + 0.3345 * t - 0.060374 * t2 + 0.0017275 * t3 
+                 + 0.000651814 * t4 + 0.00002373599 * t5;
         }
         else if (y > 2005 && y <= 2050) {
             t  = (y - 2000);
-            dt = 62.92 + 0.32217 * t + 0.005589 * t^2;
+            dt = 62.92 + 0.32217 * t + 0.005589 * t2 + c;
         }
         else if (y > 2050 && y <= 2150) {
-            dt = -20 + 32 * ((y-1820)/100)^2 - 0.5628 * (2150 - y);
+            dt = -20 + 32 * ((y-1820)/100)*((y-1820)/100) - 0.5628 * (2150 - y) + c;
+        }
+        else if (y > 2150) {
+            u  = (y-1820)/100;
+            dt = -20 + 32 * u*u + c;
         }
         
         return dt;
@@ -1425,7 +1524,8 @@
     
     function dms2real (deg, min, sec)
     {
-        /* convert latitude/longitude (deg, min, sec) to degrees */
+        /*  convert latitude/longitude (deg, min, sec) to degrees  */
+       
         var r;
         if (deg < 0) r =  deg - min/60 - sec/3600;
         else         r =  deg + min/60 + sec/3600;       
@@ -1435,18 +1535,22 @@
      
     function hms2deg (hours, min, sec)
     {
-        /* convert right ascension to degrees 
-           hours*15.0+(min/60.0)*15.0+(sec/3600.0)*15.0;
+        /*  convert right ascension to degrees 
+            hours*15.0+(min/60.0)*15.0+(sec/3600.0)*15.0;
          */
-        return (hours * 15 + min/4 + sec/240);
+        
+         return (hours * 15 + min/4 + sec/240);
     }
     
-    function deg2hms (x)
+    function dec2hms (x)
     {
-        /* convert degrees to hh:mm:ss */
+        /*  convert dec hours to hh:mm:ss  */
+       
+        if (isNaN(x)) return ("00:00:00");
+         
         var st = x;
-        var s = st;      
-        st  = st / 15.0; 
+        var s  = st;      
+        st     = st; 
         
         var d = Math.floor( s );
         
@@ -1464,7 +1568,71 @@
         st  = st * 60;
         var second = Math.floor( st );
         
-        return (hour+":"+minute+":"+second);
+        var str = ((hour  <10) ?  "0" :  "") + hour;
+        str    += ((minute<10) ? ":0" : ":") + minute;
+        str    += ((second<10) ? ":0" : ":") + second;
+        
+        return str;
+    }
+    
+    function deg2hms (x)
+    {
+        /* convert degrees to hh:mm:ss */
+        
+        if (isNaN(x)) return ("00:00:00");
+         
+        var st = x;
+        var s  = st;      
+        st     = st / 15.0; 
+        
+        var d = Math.floor( s );
+        
+        s = s - d;
+        s = s * 60;
+        var mm = Math.floor( s );
+        
+        var hour = Math.floor( st );
+        
+        st  = st - hour;
+        st  = st * 60;
+        var minute = Math.floor( st );
+        
+        st  = st - minute;
+        st  = st * 60;
+        var second = Math.floor( st );
+        
+        var str = ((hour  <10) ?  "0" :  "") + hour;
+        str    += ((minute<10) ? ":0" : ":") + minute;
+        str    += ((second<10) ? ":0" : ":") + second;
+        
+        return str;
+    }
+    
+    function dec2date (etime)
+    {
+        /* convert dec number to dd/mm/yyyy */
+        
+        if (isNaN(etime)) return ("00/00/0000");
+        
+        var s = etime;
+        var tmp = Math.round(s);
+        var year = parseInt(date.getFullYear() - tmp);
+        
+        s = s - tmp;
+        var tmp0 = Math.round(s*12);
+        var month = parseInt((12-tmp0)+(date.getMonth()+1) - 12);
+        if (isNaN(month) || month<0) month=1;
+        
+        var tmp1 = Math.round(s*12);
+        var tmp2 = Math.abs(tmp1 - (s*12));
+        var tmp3 = Math.round(tmp2*30);
+        var day  = Math.abs((30-date.getDate())-tmp3);
+        
+        var str = ((day   <10) ?  "0" :  "") + day;
+        str    += ((month <10) ? "/0" : "/") + month;
+        str    += ((year<1000) ? "/0" : "/") + year;
+        
+        return str;
     }
     
     function _abs (x)
@@ -1476,9 +1644,15 @@
         return r;
     }
     
+    function mod24 (x)
+    {
+        return (x + 24) % 24;
+    }
+    
     function mod2pi(x)
     {
         /* range 0-2PI radians */
+        
         var b = x/(2*Math.PI);
         var a = (2*Math.PI)*(b - _abs(b));
         if (a < 0) a = (2*Math.PI) + a;
@@ -1489,53 +1663,381 @@
     function mod360 (x) 
     {
         /* range 0-360 degrees */
+        
         var a = 360 * ((x / 360) - _abs(x / 360));
         if (a < 0) a = a + 360; 
        
         return a;
     }
     
-    function calc_moon_acending_node () 
+    function calc_moon_acending_node (transit) 
     { 
         /*   http://idlastro.gsfc.nasa.gov
          *   Q.What is the licensing for the IDL Astronomy Library?
          *   A.The IDL Astronomy Library procedures are in the public domain. 
          */
-        var T  = (calc_julian_date() - 2415020.5)/36525.0;
-        var ay = calc_ayanamsa();
+
+        var T,today=new Date(),ay,n;
+        if (!transit) T=(calc_julian_date(time.getHours(),time.getMinutes(),tz,transit)-2415020.5)/36525.0;
+        else          T=(calc_julian_date(today.getHours(),today.getMinutes(),tz,transit)-2415020.5)/36525.0;
+        ay = calc_ayanamsa (transit);
         
         /* compute longitude of Moon's ascending node */
-        var n  = mod2pi((259.183275 - 1800*T - 134.142008*T + 0.002078*T*T)*RADS)*DEGS;
+        n  = mod2pi((259.183275 - 1800*T - 134.142008*T + 0.002078*T*T)*RADS)*DEGS;
         
         return (n-ay);
     }
     
-    function calc_ayanamsa ()
+    function calc_ayanamsa (transit)
     {
         /*   The longitudinal difference between the
          *   Tropical(Sayana) and Sidereal(Nirayana) zodiacs.
-         */     
-        var c = date.getFullYear()*1.0/1000.;
+         */
+
+        var d,today=new Date(),yy,mm,dd;
+        if (!transit) {
+            yy=date.getFullYear();
+            mm=date.getMonth()+1;
+            dd=date.getDate();
+        }
+        else {
+            yy=today.getFullYear();
+            mm=today.getMonth()+1;
+            dd=today.getDate();
+        }
+        if (yy < 100)  d = 10.;
+        else         d = 1000.;
+        var c = yy*1.0/d;
         var a = -6.92416+16.90709*c-0.757371*c*c;
-        var b = ((date.getMonth()) + (date.getDate())/30.)*1.1574074/1000.;
+        var b = (mm + dd/30.)*1.1574074/d;
         
         return (a + b);
     }
     
-    function calc_ascendant ()
+    function calc_ascendant (hours,minutes,transit)
     {       
         /*   tan(asc) = cos(t) / -(sin(t)*cos(ecl) + tan(lat)*sin(ecl))
          *   t   -  local sidereal time
          *   ecl -  obliquity of the ecliptic. Standard equinox J2000.0 use 23.4392911°
          *   lat -  local latitude (Southern latitudes are negative, Northern positive)
          */
-        var t   = calc_sideral_time(); 
-        var ecl = _ecl(calc_julian_date());
+
+        var t   = calc_sideral_time(hours,minutes,transit); 
+        var ecl = _ecl(calc_julian_date(hours,minutes,tz,transit));
       
         var asc = Math.atan2(Math.cos(t*RADS), -Math.sin(t*RADS)*Math.cos(ecl*RADS) 
                                                -Math.tan(lat*RADS)*Math.sin(ecl*RADS));
+                                                 
         return (asc*DEGS);
     }                           
+    
+    function calc_tithi(transit)
+    {
+        /*   The angle between Sun and the Moon
+         *   Tithi = (Moon Longitude - Sun Longitude) / 12
+         *   K - Krishna, S - Sukla, 
+         *   K.Pratipada - Waning Moon(darker phase), S.Pratipada - Waxing Moon(brighter phase)
+         * 
+         *   Swara ancient scince of breath
+         *   Pingala Nadi   - right nostril(left brain hemisphere) 
+         *   Ida Nadi       - left nostril(right brain hemisphere)
+         *   Shushumna Nadi - both nostril(central channel)
+         */ 
+         
+         /* Sunrise swara, for Sunset swara reverse sunrise swara */
+         var tithi = ["1/K.Pratipada/Pin.",  "2/K.Dvitiya/Pin.",   "3/K.Tritiya/Pin.",   
+                      "4/K.Chaturthi/Ida",   "5/K.Panchami/Ida",   "6/K.Shashthi/Ida",     
+                      "7/K.Saptami/Pin.",    "8/K.Ashtami/Pin.",   "9/K.Navami/Pin.",
+                      "10/K.Dasami/Ida",     "11/K.Ekadasi/Ida",   "12/K.Dwadasi/Ida",    
+                      "13/K.Trayodasi/Pin.", "14/K.Chaturd./Pin.", "15/K.Amavasya/Pin.",
+                      "1/S.Pratipada/Ida",   "2/S.Dvitiya/Ida",    "3/S.Tritiya/Ida",
+                      "4/S.Chaturthi/Pin.",  "5/S.Panchami/Pin.",  "6/S.Shashthi/Pin.",
+                      "7/S.Saptami/Ida",     "8/S.Ashtami/Ida",    "9/S.Navami/Ida",
+                      "10/S.Dasami/Pin.",    "11/S.Ekadasi/Pin.",  "12/S.Dwadasi/Pin.",
+                      "13/S.Trayodasi/Ida",  "14/S.Chaturd./Pin.", "15/S.Purnima/Ida"];
+        
+        var ay = calc_ayanamsa(transit),today=new Date();;
+        if (!transit) var jd = calc_julian_date(time.getHours(),time.getMinutes(),tz,transit);
+        else          var jd = calc_julian_date(today.getHours(),today.getMinutes(),tz,transit);
+        var tlon = ((calc_moon_positionIII(transit)-ay) - (calc_vsop87(1,jd)-ay))/12;  
+        
+        if      (tlon > 15)             tlon -=15;
+        else if (tlon < 15 && tlon > 0) tlon +=15;
+        else if (tlon > 30)             tlon -=30;  
+        else if (tlon <  0)   tlon = Math.round(Math.abs(tlon*2)); 
+       
+        return (tithi[Math.round(Math.abs(Math.floor(tlon)))]);
+    }
+ 
+    function calc_day_lord (transit)
+    {
+        var jd  = calc_julian_date(time.getHours(),time.getMinutes(),0,transit);
+        var day = (Math.floor(jd + 0.5) + 1) % 7;
+        var str;
+        
+        switch (day) {
+            case 0:
+                str="Sun";
+                break;
+            case 1:
+                str="Moon";
+                break;
+            case 2:
+                str="Mars";         
+                break;
+            case 3:
+                str="Mercury";                
+                break;
+            case 4:
+                str="Jupiter";         
+                break;
+            case 5:  
+                str="Venus";       
+                break;
+            case 6:
+                str="Shani";         
+                break;
+            default:
+                str="NaN"; 
+        }
+            
+        return (str);
+    }
+    
+    function calc_hora_lord (transit)
+    {
+        var lords = ["Sun","Venus","Mercury","Moon","Shani","Jupiter","Mars"];
+        var hour=[], lord=[], currentlord, currenthour,today=new Date();;
+        
+        if (!transit)  currenthour = (time.getHours()  + time.getMinutes()/60);
+        else           currenthour = (today.getHours() + today.getMinutes()/60);
+        var daylord    = calc_day_lord (transit);
+        var index      = lords.indexOf(daylord);
+        var todayrise    = calc_sunriseset(true, false, false, transit);
+        var todayset     = calc_sunriseset(false,false, false, transit);
+        var tomorrowrise = calc_sunriseset(true, true,  false, transit); 
+        
+        var daylength    =  ((todayset      - todayrise) / 12);
+        var nightlength  =  (((24-todayset) + tomorrowrise) / 12);
+        
+        hour[0]  = todayrise;
+        for (var i=1; i<12; i++)  {  hour[i] = hour[i-1] + daylength;   }
+        hour[12] = todayset;
+        for (var i=13; i<25; i++) {  hour[i] = hour[i-1] + nightlength; }
+        
+        lord[0]  = lords[index];
+        for (var i=1; i<25; i++)  {
+             if (index > 5) { index = -1; }
+             lord[i] = lords[index+1];
+             index++;
+        }
+        for (var i=0; i<24; i++) {
+             if (currenthour < (tomorrowrise))
+             currenthour +=24;
+             if ((currenthour >= hour[i]) && (currenthour <= hour[i+1]))
+                  currentlord = lord[i];
+        }
+        
+        return currentlord;
+    }
+    
+    function calc_sunriseset (rising,hora,hms,transit)
+    {       
+        /*   Almanac for Computers, 1990
+         *   published by Nautical Almanac Office
+         *   United States Naval Observatory, Washington, DC 20392 
+         */
+        
+        var offical      = (90+(50/60));// 90°50'00"
+        var civil        = 96;          // 96°00'00"
+        var nautical     = 102;         //102°00'00" 
+        var astronomical = 108;         //108°00'00"
+        
+        var zenith = offical; 
+        
+        /* Day of the Year */
+        var today=new Date(),yy,mm,dd;
+        if (!transit) {
+             yy=date.getFullYear();
+             mm=date.getMonth()+1;
+             dd=date.getDate();
+        }
+        else {
+             yy=today.getFullYear();
+             mm=today.getMonth()+1;
+             dd=today.getDate();
+        }
+        var a = Math.floor(275 * mm / 9);
+        var b = Math.floor((mm + 9) / 12);
+        var c = (1 + Math.floor((yy - 4 * Math.floor(yy / 4) + 2) / 3));
+        var n  = hora ? a - (c*b) + (dd+1) - 30 : a - (c*b) + dd - 30;
+        var lonhour = lon / 15;
+        
+        if (rising) var t = n + ((6 -lonhour)/24);
+        else        var t = n + ((18-lonhour)/24);
+        
+        var Ms = (0.9856 * t) - 3.289;
+        
+        var Ls = mod360(Ms + (1.916 * Math.sin(Ms*RADS)) + (0.020*Math.sin(2*Ms*RADS)) + 282.634);
+        var ra = mod360(Math.atan(0.91764 * Math.tan(Ls*RADS))*DEGS);
+        var Lquadrant  = (Math.floor(Ls/90)) * 90;
+        var RAquadrant = (Math.floor(ra/90)) * 90;
+        ra = (ra + (Lquadrant - RAquadrant)) / 15;
+        
+        var sind = 0.39782 * Math.sin(Ls*RADS)
+        var cosd = Math.cos((Math.asin(sind)*DEGS)*RADS);
+        var cosh = (Math.cos(zenith*RADS) - (sind * Math.sin(lat*RADS))) / (cosd * Math.cos(lat*RADS));
+        if      (cosh >  1) { return '00:00:00'; }
+        else if (cosh < -1) { return '00:00:00'; }
+        else {
+                var h  = rising ? (360-(Math.acos(cosh)*DEGS))/15 : (Math.acos(cosh)*DEGS)/15;
+                var tm = h + ra - (0.06571 * t) - 6.622;
+                var UT = mod24(tm-lonhour) + (1.0*tz);
+                if ( UT < 0 ) UT += 24; UT %= 24;
+        }
+        
+        /*   High accuracy
+         *   Sunrise[t] = Rising Sign[deg] = The Sun's longitude[deg]
+         */
+        var sunhour = parseInt(UT);
+        
+        var jd, rsun, asc, rsunrise, rsunset, sunminute=0;
+        if (rising) {
+           for (sunminute=0; sunminute<123; sunminute++) {
+              jd = calc_julian_date(sunhour,sunminute,tz,transit);
+              asc  = mod360(Math.floor(calc_ascendant(sunhour, sunminute,transit)));
+              rsun = mod360(Math.floor(calc_vsop87(1,jd)));
+              if (rsun == asc) {
+                 sunminute++
+                 break;
+              }
+           }
+        }
+        if (!rising) {
+           for (sunminute=0; sunminute<123; sunminute++) {
+              jd = calc_julian_date(sunhour,sunminute,tz,transit);
+              asc  = mod360(Math.floor(calc_ascendant(sunhour, sunminute,transit)));
+              rsun = mod360(Math.floor(calc_vsop87(1,jd))+180);
+              if (rsun == asc) {
+                  sunminute++
+                  break;
+              }
+           }
+        }
+        
+        return hms ? dec2hms(sunhour+((sunminute)/60)) : (sunhour+((sunminute)/60)); 
+    }
+    
+    function calc_vimsottari_dasa (d)
+    {
+        var lord   = ["Me","Ke","Ve","Su","Mo","Ma","Ra","Ju","Sa"];
+        var tdasa  = [6209.116431424950, 2556.695001174980, 7304.842860499940,
+                      2191.452858149980, 3652.421430249970, 2556.695001174980,
+                      6574.358574449950, 5843.874288399950, 6939.600717474940];
+        
+        var jd =  calc_julian_date(time.getHours(),time.getMinutes(),0,false);
+        var Ts = (jd - 2415020.0)/36525.0;
+        var Tm = (jd - 2451545.0)/36525.0;
+        
+        /*  Tropical month */
+        var tropmonth = 27.321661547  + 0.000000001857 * date.getFullYear();
+        /*  Synodic month */
+        var synmonth  = 29.5305888531 + 0.00000021621*Tm - 3.64*(10e-10)*Tm*Tm;
+        
+        /*  Mean Tropical year(solar year), McCarthy & Seidelmann, 2009, page.18, J. Laskar [1986] */
+        var solaryear   = 365.2421896698-6.15359*(10e-6)*Ts-7.29*(10e-10)*Ts*Ts+2.64*(10e-10)*Ts*Ts*Ts; 
+        var sideralyear = solaryear + (1 + (1/26000));
+        var savanayear  = 360;
+        var lunaryear   = 12 * synmonth;
+        
+        var sideralday  = 24 * solaryear/sideralyear;
+        var civilday    = 24 * 86400/60/60/24;
+        var synodicday  = 24 * 360/sideralyear;
+        var ratio       = 1/100273790935;
+        
+        var ay    = aynow    = calc_ayanamsa(false);
+        var moon  = moonnow  = mod360(calc_moon_positionIII(false) - ay);
+        var sdeg  = sdegnow  = calc_nakshatra(mygrahas[2].getra(),4);
+        var nlord = nlordnow = calc_nakshatra(mygrahas[2].getra(),2);
+        
+        var index  = lord.indexOf(nlord);
+        var period = tdasa[lord.indexOf(nlord)];
+        
+        /*  Dasa balance
+            http://www.saravali.de/articles/dasa_balance.html 
+         */
+        var balance  = ((moon - sdeg) / 13.3333);
+        var lbalance = 1 - balance;
+        var etime    = Math.abs(balance * (period/solaryear));
+        
+        var ta=0, tp=0, mlord=nlord, alord, plord, cmlord, calord, cplord,
+        today=new Date(), currentmaha=0, indexcurrent=index, year;
+        var ayear = (today.getFullYear()*solaryear)+((today.getMonth()+1)*30)+today.getDate();
+        var byear = (date.getFullYear()*solaryear)+((date.getMonth()+1)*30)+date.getDate();
+        var tyear = ayear - byear;
+        
+        /* Vimsottari Antardasa */
+        for(var i=0; i<9; i++) {
+            if (index > 8) index = 0;
+            ta += tdasa[index]/solaryear/120;
+            if(ta > balance) { alord = lord[index]; break; }
+            index++; 
+        }   
+        /* Vimsottari Pratyantardasa */
+        ta = 1 - ((ta - balance) / (tdasa[index]/solaryear/120)); 
+        for(var i=0; i<9; i++) {
+            if(index > 8) index = 0;
+            tp += tdasa[index]/solaryear/120;
+            if(tp > ta) { plord = lord[index]; break; } 
+            index++;
+        }
+        /* Current Vimsottari Maha Dasa */
+        var nbalance = (lbalance * tdasa[indexcurrent]);
+        year = (ayear-(byear+nbalance)) ; indexcurrent++; ta = 0; 
+        for(var i=0; i<9; i++) {
+            if(indexcurrent > 8) indexcurrent = 0;
+            ta += tdasa[indexcurrent];
+            if(ta > year) { cmlord = lord[indexcurrent]; break; } 
+            indexcurrent++;
+        }
+        /* Current Vimsottari Antardasa */
+        year = 1 - (ta - year)/tdasa[indexcurrent]; ta = 0;
+        for(var i=0; i<9; i++) {
+            if(indexcurrent > 8) indexcurrent = 0;
+            ta += tdasa[indexcurrent]/solaryear/120;
+            if(ta > year) { calord = lord[indexcurrent]; break; } 
+            indexcurrent++;
+        }
+        /* Current Vimsottari Pratyantardasa */
+        tp = 0; ta = 1 - ((ta - year) / (tdasa[indexcurrent]/solaryear/120)); 
+        for(var i=0; i<9; i++) {
+            if(indexcurrent > 8) indexcurrent = 0;
+            tp += tdasa[indexcurrent]/solaryear/120;
+            if(tp > ta) { cplord = lord[indexcurrent]; break; } 
+            indexcurrent++;
+        }
+        
+        var tstr   =  dec2date (etime);
+        
+        var nowstr = " ";
+        nowstr    += (((today.getDate())    <10)   ?  "0" :  "") + (today.getDate());
+        nowstr    += (((today.getMonth()+1) <10)   ? "/0" : "/") + (today.getMonth()+1);
+        nowstr    += (((today.getFullYear())<1000) ? "/0" : "/") + (today.getFullYear());
+        
+        var nstr = mlord; //    M.Lord
+        nstr    += "/";
+        nstr    += alord; //    A.Lord
+        nstr    += "/";
+        nstr    += plord; //    P.Lord
+        nstr    += "     ";
+        nstr    += cmlord;// C. M.Lord
+        nstr    += "/";
+        nstr    += calord;// C. A.Lord
+        nstr    += "/";
+        nstr    += cplord;// C. P.Lord
+        
+        return d ? tstr+" "+nowstr : nstr;
+    }
     
     function onmousedown (e)
     {
@@ -1545,15 +2047,23 @@
         e.preventDefault();
  
         if (e.layerX || e.layerX == 0) { 
-            x = e.layerX;
-            y = e.layerY;
+             x = e.layerX;
+             y = e.layerY;
         } 
         else if (e.offsetX || e.offsetX == 0) { 
-            x = e.offsetX;
-            y = e.offsetY;
+             x = e.offsetX;
+             y = e.offsetY;
         }
         
-        if (x > 600 && x < 621 && y > 645 && y < 657 ) {
+        if (x > 277 && x < 309 && y > 610 && y < 623 ) {
+             calc_position(false);
+             draw(false);
+        }
+        else if(x > 313 && x < 350 && y > 610 && y < 623 ) {
+             calc_position(true);
+             draw(true);
+        }
+        else if (x > 600 && x < 621 && y > 610 && y < 623 ) {
              if (forward <= 0)  forward = 2;
              mychart.clearRect (300, 0, 300, 200);
              draw_empty_chart (mychart,canvas_chart,330,0,0.2);
@@ -1561,7 +2071,7 @@
              forward -= 2; 
             
         }
-        else if(x > 622 && x < 645 && y > 645 && y < 657 ) {
+        else if(x > 624 && x < 645 && y > 610 && y < 623 ) {
              if (forward >= 10)  forward = 8;
              mychart.clearRect (300, 0, 300, 200);
              draw_empty_chart (mychart,canvas_chart,330,0,0.2);
@@ -1579,7 +2089,7 @@
         else if (e.keyCode == 189) { alert('-');  } // -
     }
     
-    function draw ()
+    function draw (transit)
     {   
         var canvas_info = document.getElementById('canvas_info');
         var myinfo = canvas_info.getContext('2d');
@@ -1590,7 +2100,7 @@
         mychart.clearRect (0, 0, canvas_chart.width, canvas_chart.height);
         canvas_chart.onselectstart = function () { return false; }
 
-        draw_info (myinfo,canvas_info);
+        draw_info (myinfo,canvas_info,transit);
         
         draw_empty_chart (mychart,canvas_chart,0,0,0.2);
         draw_zodiacs (mychart);
@@ -1654,12 +2164,13 @@
         canvas.fillText(mybhavas[12], pos[22],pos[23]);
     }
     
-    function draw_info (canvas,canvas_info) 
+    function draw_info (canvas,canvas_info,transit) 
     {
         canvas.font = '9pt Arial';
         canvas.textAlign = 'left';
         canvas.fillStyle = 'green'; //404040
-     
+        var today = new Date();
+        
         canvas.clearRect (0, 0, canvas_info.width, canvas_info.height);
             
         canvas_info.addEventListener('keydown',    onkeydown,   true);
@@ -1756,10 +2267,33 @@
             canvas.fillText(mygrahas[i].bad_friend+":(", 560, y);
             y += 15;
         }
+        canvas.textAlign="end";
+        y = 25;
+        for (var i=1; i<=9; i++) {
+            canvas.fillText(mygrahas[i].aspect, 614, y);
+            y += 15;
+        }
         
         canvas.textAlign="left";
-        canvas.fillText("Ayanamsa: "+(calc_ayanamsa().toFixed(6))+'°', 2, 170); 
-        canvas.fillText("Sid. time:    "+(deg2hms(calc_sideral_time())), 2, 185);
+        canvas.fillText("Ayanamsa:"+(calc_ayanamsa(transit).toFixed(4))+'°', 2, 170); 
+        if (!transit)
+            canvas.fillText("Sid. time:   "
+            +(deg2hms(calc_sideral_time(time.getHours(),time.getMinutes(),transit))), 2, 185); 
+        else
+            canvas.fillText("Sid. time:   "
+            +(deg2hms(calc_sideral_time(today.getHours(),today.getMinutes(),transit))), 2, 185); 
+        canvas.fillText("Sunrise:"+calc_sunriseset(true,  false, true, transit), 120, 170);
+        canvas.fillText("Sunset: "+calc_sunriseset(false, false, true, transit), 120, 185);
+        
+        canvas.fillText("Day   Lord:"+calc_day_lord(transit), 225, 170);
+        canvas.fillText("Hora Lord:"+calc_hora_lord(transit), 225, 185);
+        
+        canvas.fillText("Tithi:"+calc_tithi(transit),  330, 185);
+        canvas.fillText("Weekday:"+calc_day_of_the_week(transit), 330, 170); 
+        if (!transit) {
+            canvas.fillText("Dasa:"+calc_vimsottari_dasa(false), 461, 170);
+            canvas.fillText("Dasa:"+calc_vimsottari_dasa(true),  461, 185);
+        }
     }
     
     function draw_empty_chart (canvas,canvas_chart,_x,_y, lwidth) 
@@ -1853,6 +2387,9 @@
         canvas.fillText(house[10], pos[18]+xoffset,pos[19]); 
         canvas.fillText(house[11], pos[20]+xoffset,pos[21]); 
         canvas.fillText(house[12], pos[22]+xoffset,pos[23]);
+        
+        canvas.textAlign = 'left';
+        canvas.fillText("natal  |  transit",2, 209);
         
         canvas.textAlign = 'center';
         canvas.fillText(d, pos[0]+xoffset, 105);
