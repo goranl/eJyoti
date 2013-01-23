@@ -10,7 +10,7 @@
         <meta name="description"   content="jyotish birth chart">
         <meta name="keywords"    content="jyotish,vedic astrology,birth chart,rasi,navamsa,astronomy">
         <meta name="viewport"  content="width=device-width, initial-scale=1.0, user-scalable=0">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+         <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">-->
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="eJyotivsop87.js"></script>
         <!-- Recommended fonts: Arial:15, Serif:15 and Modern web browsers -->
@@ -40,13 +40,14 @@
         <label>Name:</label>
         <input type="text" id="name" name="name" placeholder="Name" value="" min="1" max="15">
 
-        <label>Date:</label>
-        <input type="date" id="date" name="date" placeholder="1900-02-31" min="0000-01-01" max="6000-01-31" 
+        <DIV id="mdate" title="Date format: 1900-02-31 | 1900/02/31 ">Date:</DIV>
+        <input type="date" id="date" name="date" placeholder="1900/02/31" min="0000-01-01" max="6000-01-31" 
         pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01]{10,10}" value=""
         required>
         
         <DIV id="mtime" title="Time format: 23:59 | 7:59 ">Time:</DIV>
         <input type="time" id="time" name="time" placeholder="23:59" value="" step="10"
+        pattern="[0-9]{2}:(0[1-9]|1[012]):(0[1-9]|1[0-9]|2[0-9]|3[01]{8,8}"
         required>
         
         <DIV id="mtz" title="Time Zone to GMT +|-&#013;East of GMT: +, and for West of GMT: -&#013;(decimal)"
@@ -262,7 +263,8 @@
     
     function parse_date (input) 
     {
-        /* Date format: 1901-02-31 */
+        /* Date format: 1901-02-31 | 1901/2/31*/
+       
         date  = 0;
         date  = new Date(input);
     }
@@ -270,6 +272,7 @@
     function parse_time (input)
     {
         /* Time format: 23:59 | 7:59 | 07:59  */
+       
         time = 0;
         time = new Date();
         
@@ -285,9 +288,9 @@
         
         if (parseInt(tmp[1]) >= 24 || parseInt(tmp[3]) > 59 ||
               (parseInt(tmp[1]) == 00 && parseInt(tmp[3]) == 00)) {
-        time.setHours(parseInt(0));
-        time.setMinutes(parseInt(1));
-        document.getElementById('time').value = '00:01';
+               time.setHours(parseInt(0));
+               time.setMinutes(parseInt(1));
+               document.getElementById('time').value = '00:01';
         }
     }
     
@@ -651,17 +654,17 @@
         if      (n == 1)  return nakshatra;
         else if (n == 2)  return lord;
         else if (n == 3)  {
-            if (pada >= 0.000000 && pada <=3.333334)
-            return 1;
-            if (pada > 3.333334  && pada <=6.666667)
-            return 2;
-            if (pada > 6.666667  && pada <=9.999999)
-            return 3;
-            if (pada > 9.999999  && pada <=13.400000)
-            return 4;
+             if (pada >= 0.000000 && pada <=3.333334)
+                return 1;
+             if (pada > 3.333334  && pada <=6.666667)
+                return 2;
+             if (pada > 6.666667  && pada <=9.999999)
+                return 3;
+             if (pada > 9.999999  && pada <=13.400000)
+                return 4;
         }
         else if (n == 4)  {
-            return sdeg;
+                return sdeg;
         }
     }
     
@@ -728,6 +731,7 @@
     {   
        /*    http://ssd.jpl.nasa.gov
         *    http://spaceflight.nasa.gov/realdata/elements
+        *    http://solarsystem.nasa.gov
         */
 
         a = parseFloat("0");        /*   semi-major axis [AU]       */
@@ -1441,11 +1445,11 @@
     
     function dT (transit)
     {
-        /*  http://eclipse.gsfc.nasa.gov/SEhelp/deltaT.html
+        /*   http://eclipse.gsfc.nasa.gov/SEhelp/deltaT.html
          *  
-         *  Terrestrial Dynamical Time (TD), Universal Time (UT) 
-         *  The parameter delta-T (ΔT) is the arithmetic difference,
-         *  in seconds, between the two as: ΔT = TD - UT 
+         *   Terrestrial Dynamical Time (TD), Universal Time (UT) 
+         *   The parameter delta-T (ΔT) is the arithmetic difference,
+         *   in seconds, between the two as: ΔT = TD - UT 
          */
         
         var today=new Date(),y;
@@ -1807,7 +1811,7 @@
     function calc_hora_lord (transit)
     {
         var lords = ["Sun","Venus","Mercury","Moon","Shani","Jupiter","Mars"];
-        var hour=[], lord=[], currentlord, currenthour,today=new Date();;
+        var hour=[], lord=[], currentlord, currenthour,today=new Date();
         
         if (!transit)  currenthour = (time.getHours()  + time.getMinutes()/60);
         else           currenthour = (today.getHours() + today.getMinutes()/60);
@@ -1843,89 +1847,110 @@
     
     function calc_sunriseset (rising,hora,hms,transit)
     {       
-        /*   Almanac for Computers, 1990
-         *   published by Nautical Almanac Office
-         *   United States Naval Observatory, Washington, DC 20392 
-         */
+       /*   Almanac for Computers, 1990
+        *   published by Nautical Almanac Office
+        *   United States Naval Observatory, Washington, DC 20392 
+        */
         
-        var offical      = (90+(50/60));// 90°50'00"
-        var civil        = 96;          // 96°00'00"
-        var nautical     = 102;         //102°00'00" 
-        var astronomical = 108;         //108°00'00"
+       var offical      = (90+(50/60));// 90°50'00"
+       var civil        = 96;          // 96°00'00"
+       var nautical     = 102;         //102°00'00" 
+       var astronomical = 108;         //108°00'00"
         
-        var zenith = offical; 
+       var zenith = offical; 
         
-        /* Day of the Year */
-        var today=new Date(),yy,mm,dd;
-        if (!transit) {
+       /* Day of the Year */
+       var today=new Date(),yy,mm,dd;
+       if (!transit) {
              yy=date.getFullYear();
              mm=date.getMonth()+1;
              dd=date.getDate();
-        }
-        else {
+       }
+       else {
              yy=today.getFullYear();
              mm=today.getMonth()+1;
              dd=today.getDate();
-        }
-        var a = Math.floor(275 * mm / 9);
-        var b = Math.floor((mm + 9) / 12);
-        var c = (1 + Math.floor((yy - 4 * Math.floor(yy / 4) + 2) / 3));
-        var n  = hora ? a - (c*b) + (dd+1) - 30 : a - (c*b) + dd - 30;
-        var lonhour = lon / 15;
+       }
+       var a = Math.floor(275 * mm / 9);
+       var b = Math.floor((mm + 9) / 12);
+       var c = (1 + Math.floor((yy - 4 * Math.floor(yy / 4) + 2) / 3));
+       var n  = hora ? a - (c*b) + (dd+1) - 30 : a - (c*b) + dd - 30;
+       var lonhour = lon / 15;
         
-        if (rising) var t = n + ((6 -lonhour)/24);
-        else        var t = n + ((18-lonhour)/24);
+       if (rising) var t = n + ((6 -lonhour)/24);
+       else        var t = n + ((18-lonhour)/24);
         
-        var Ms = (0.9856 * t) - 3.289;
+       var Ms = (0.9856 * t) - 3.289;
         
-        var Ls = mod360(Ms + (1.916 * Math.sin(Ms*RADS)) + (0.020*Math.sin(2*Ms*RADS)) + 282.634);
-        var ra = mod360(Math.atan(0.91764 * Math.tan(Ls*RADS))*DEGS);
-        var Lquadrant  = (Math.floor(Ls/90)) * 90;
-        var RAquadrant = (Math.floor(ra/90)) * 90;
-        ra = (ra + (Lquadrant - RAquadrant)) / 15;
+       var Ls = mod360(Ms + (1.916 * Math.sin(Ms*RADS)) + (0.020*Math.sin(2*Ms*RADS)) + 282.634);
+       var ra = mod360(Math.atan(0.91764 * Math.tan(Ls*RADS))*DEGS);
+       var Lquadrant  = (Math.floor(Ls/90)) * 90;
+       var RAquadrant = (Math.floor(ra/90)) * 90;
+       ra = (ra + (Lquadrant - RAquadrant)) / 15;
         
-        var sind = 0.39782 * Math.sin(Ls*RADS)
-        var cosd = Math.cos((Math.asin(sind)*DEGS)*RADS);
-        var cosh = (Math.cos(zenith*RADS) - (sind * Math.sin(lat*RADS))) / (cosd * Math.cos(lat*RADS));
-        if      (cosh >  1) { return '00:00:00'; }
-        else if (cosh < -1) { return '00:00:00'; }
-        else {
-                var h  = rising ? (360-(Math.acos(cosh)*DEGS))/15 : (Math.acos(cosh)*DEGS)/15;
-                var tm = h + ra - (0.06571 * t) - 6.622;
-                var UT = mod24(tm-lonhour) + (1.0*tz);
-                if ( UT < 0 ) UT += 24; UT %= 24;
-        }
+       var sind = 0.39782 * Math.sin(Ls*RADS)
+       var cosd = Math.cos((Math.asin(sind)*DEGS)*RADS);
+       var cosh = (Math.cos(zenith*RADS) - (sind * Math.sin(lat*RADS))) / (cosd * Math.cos(lat*RADS));
+       if      (cosh >  1) { return '00:00:00'; }
+       else if (cosh < -1) { return '00:00:00'; }
+       else {
+               var h  = rising ? (360-(Math.acos(cosh)*DEGS))/15 : (Math.acos(cosh)*DEGS)/15;
+               var tm = h + ra - (0.06571 * t) - 6.622;
+               var UT = mod24(tm-lonhour) + (1.0*tz);
+               if ( UT < 0 ) UT += 24; UT %= 24;
+       }
         
-        /*   High accuracy
-         *   Sunrise[t] = Rising Sign[deg] = The Sun's longitude[deg]
-         */
-        var sunhour = parseInt(UT);
-        
-        var jd, rsun, asc, rsunrise, rsunset, sunminute=0;
-        if (rising) {
-           for (sunminute=0; sunminute<123; sunminute++) {
-              jd = calc_julian_date(sunhour,sunminute,tz,transit);
-              asc  = mod360(Math.floor(calc_ascendant(sunhour, sunminute,transit)));
-              rsun = mod360(Math.floor(calc_vsop87(1,jd)));
-              if (rsun == asc) {
-                 sunminute++
-                 break;
-              }
-           }
-        }
-        if (!rising) {
-           for (sunminute=0; sunminute<123; sunminute++) {
-              jd = calc_julian_date(sunhour,sunminute,tz,transit);
-              asc  = mod360(Math.floor(calc_ascendant(sunhour, sunminute,transit)));
-              rsun = mod360(Math.floor(calc_vsop87(1,jd))+180);
-              if (rsun == asc) {
-                  sunminute++
-                  break;
-              }
-           }
-        }
-        
-        return hms ? dec2hms(sunhour+((sunminute)/60)) : (sunhour+((sunminute)/60)); 
+       /*   High accuracy
+        *   Sunrise[t] = Rising Sign[deg] = The Sun's longitude[deg]
+        */
+       var sunhour = parseInt(UT);
+       var jd, rsun, asc, rsunrise, rsunset, sunminute=0;
+       
+       //  Related to mobile platform
+       //  If does not work, comment out all code between 1912-1952
+       //  then left only: return hms ? dec2hms(UT) : (UT);
+       var browser = navigator.userAgent.toLowerCase();
+       
+       if((browser.indexOf("firefox") > -1) ||
+          (browser.indexOf("chrome")  > -1) ||
+          (browser.indexOf("msie")    > -1)) {
+          
+           if (rising) {
+           try
+              {
+                  for (sunminute=0; sunminute<63; sunminute++) {
+                     jd   = calc_julian_date(sunhour,sunminute,tz,transit);
+                     asc  = (Math.floor(calc_ascendant(sunhour, sunminute,transit)));
+                     rsun = (Math.floor(calc_vsop87(1,jd)));
+                     if(asc  < 0.0)asc  += 360;if(asc  > 360)asc  -= 360;
+                     if(rsun < 0.0)rsun += 360;if(rsun > 360)rsun -= 360;
+                     if (rsun == asc) {
+                         sunminute++ 
+                         break;
+                     }
+                  }
+               } catch(e) { return hms ? dec2hms(UT) : (UT); }
+            }
+            if (!rising) {
+            try
+               {
+                  for (sunminute=0; sunminute<63; sunminute++) {
+                     jd   = calc_julian_date(sunhour,sunminute,tz,transit);
+                     asc  = (Math.floor(calc_ascendant(sunhour, sunminute,transit)));
+                     rsun = (Math.floor(calc_vsop87(1,jd))+180);
+                     if(asc  < 0.0)asc  += 360;if(asc  > 360)asc  -= 360;
+                     if(rsun < 0.0)rsun += 360;if(rsun > 360)rsun -= 360;
+                     if (rsun == asc) {
+                         sunminute++
+                         break;
+                     }
+                  }
+               } catch(e) { return hms ? dec2hms(UT) : (UT); }
+            }
+            return hms ? dec2hms(sunhour+((sunminute)/60)) : (sunhour+((sunminute)/60)); 
+       }
+       else
+            return hms ? dec2hms(UT) : (UT);
     }
     
     function calc_vimsottari_dasa (d)
@@ -1955,10 +1980,10 @@
         var synodicday  = 24 * 360/sideralyear;
         var ratio       = 1/100273790935;
         
-        var ay    = aynow    = calc_ayanamsa(false);
-        var moon  = moonnow  = mod360(calc_moon_positionIII(false) - ay);
-        var sdeg  = sdegnow  = calc_nakshatra(mygrahas[2].getra(),4);
-        var nlord = nlordnow = calc_nakshatra(mygrahas[2].getra(),2);
+        var ay    = calc_ayanamsa(false);
+        var moon  = mod360(calc_moon_positionIII(false) - ay);
+        var sdeg  = calc_nakshatra(mygrahas[2].getra(),4);
+        var nlord = calc_nakshatra(mygrahas[2].getra(),2);
         
         var index  = lord.indexOf(nlord);
         var period = tdasa[lord.indexOf(nlord)];
@@ -1993,7 +2018,7 @@
         }
         /* Current Vimsottari Maha Dasa */
         var nbalance = (lbalance * tdasa[indexcurrent]);
-        year = (ayear-(byear+nbalance)) ; indexcurrent++; ta = 0; 
+        year = (ayear-(byear+nbalance)); indexcurrent++; ta = 0; 
         for(var i=0; i<9; i++) {
             if(indexcurrent > 8) indexcurrent = 0;
             ta += tdasa[indexcurrent];
@@ -2276,20 +2301,23 @@
         
         canvas.textAlign="left";
         canvas.fillText("Ayanamsa:"+(calc_ayanamsa(transit).toFixed(4))+'°', 2, 170); 
+        
         if (!transit)
             canvas.fillText("Sid. time:   "
             +(deg2hms(calc_sideral_time(time.getHours(),time.getMinutes(),transit))), 2, 185); 
         else
             canvas.fillText("Sid. time:   "
             +(deg2hms(calc_sideral_time(today.getHours(),today.getMinutes(),transit))), 2, 185); 
+        
         canvas.fillText("Sunrise:"+calc_sunriseset(true,  false, true, transit), 120, 170);
         canvas.fillText("Sunset: "+calc_sunriseset(false, false, true, transit), 120, 185);
         
-        canvas.fillText("Day   Lord:"+calc_day_lord(transit), 225, 170);
-        canvas.fillText("Hora Lord:"+calc_hora_lord(transit), 225, 185);
+        canvas.fillText("Day   Lord:"+calc_day_lord(transit), 223, 170);
+        canvas.fillText("Hora Lord:"+calc_hora_lord(transit), 223, 185);
         
         canvas.fillText("Tithi:"+calc_tithi(transit),  330, 185);
         canvas.fillText("Weekday:"+calc_day_of_the_week(transit), 330, 170); 
+        
         if (!transit) {
             canvas.fillText("Dasa:"+calc_vimsottari_dasa(false), 461, 170);
             canvas.fillText("Dasa:"+calc_vimsottari_dasa(true),  461, 185);
