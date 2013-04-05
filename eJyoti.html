@@ -40,8 +40,8 @@
         <label>Name:</label>
         <input type="text" id="name" name="name" placeholder="Name" value="" min="1" max="15">
 
-        <DIV id="mdate" title="Date format: 1900-02-31 | 1900/02/31 ">Date:</DIV>
-        <input type="date" id="date" name="date" placeholder="1900/02/31" min="0000-01-01" max="6000-01-31" 
+        <DIV id="mdate" title="Date format: 1900-01-31 | 1900/01/31 ">Date:</DIV>
+        <input type="date" id="date" name="date" placeholder="1900/01/31" min="0000-01-01" max="6000-01-31" 
         pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01]{10,10}" value=""
         required>
         
@@ -62,7 +62,8 @@
         <input type="text" id="lat" name="lat" placeholder="45N48" value=""
         required>
        
-        <DIV id="mlon" title="" onclick="map()"><a>Longitude: </a></DIV>
+        <DIV id="mlon" title="If online, enter a location name&#013;and click on this link to obtain coords "
+        onclick="map()"><a>Longitude: </a></DIV>
         <input type="text" id="lon" name="lon" placeholder="15E58" value=""
         required>
         
@@ -263,7 +264,7 @@
     
     function parse_date (input) 
     {
-        /* Date format: 1901-02-31 | 1901/2/31*/
+        /* Date format: 1901-01-31 | 1901/01/31*/
        
         date  = 0;
         date  = new Date(input);
@@ -1860,16 +1861,18 @@
        var zenith = offical; 
         
        /* Day of the Year */
-       var today=new Date(),yy,mm,dd;
+       var today=new Date(),yy,mm,dd,tzdls;
        if (!transit) {
              yy=date.getFullYear();
              mm=date.getMonth()+1;
              dd=date.getDate();
+             tzdls=tz;
        }
        else {
              yy=today.getFullYear();
              mm=today.getMonth()+1;
              dd=today.getDate();
+             tzdls = -(today.getTimezoneOffset() / 60);
        }
        var a = Math.floor(275 * mm / 9);
        var b = Math.floor((mm + 9) / 12);
@@ -1896,7 +1899,7 @@
        else {
                var h  = rising ? (360-(Math.acos(cosh)*DEGS))/15 : (Math.acos(cosh)*DEGS)/15;
                var tm = h + ra - (0.06571 * t) - 6.622;
-               var UT = mod24(tm-lonhour) + (1.0*tz);
+               var UT = mod24(tm-lonhour) + (1.0*tzdls);
                if ( UT < 0 ) UT += 24; UT %= 24;
        }
         
@@ -1920,7 +1923,8 @@
               {
                   for (sunminute=0; sunminute<63; sunminute++) {
                      jd   = calc_julian_date(sunhour,sunminute,tz,transit);
-                     asc  = (Math.floor(calc_ascendant(sunhour, sunminute,transit)));
+                     if (tzdls != tz) asc  = (Math.floor(calc_ascendant(sunhour-1, sunminute,transit)));
+                     else             asc  = (Math.floor(calc_ascendant(sunhour,   sunminute,transit)));
                      rsun = (Math.floor(calc_vsop87(1,jd)));
                      if(asc  < 0.0)asc  += 360;if(asc  > 360)asc  -= 360;
                      if(rsun < 0.0)rsun += 360;if(rsun > 360)rsun -= 360;
@@ -1936,7 +1940,8 @@
                {
                   for (sunminute=0; sunminute<63; sunminute++) {
                      jd   = calc_julian_date(sunhour,sunminute,tz,transit);
-                     asc  = (Math.floor(calc_ascendant(sunhour, sunminute,transit)));
+                     if (tzdls != tz) asc  = (Math.floor(calc_ascendant(sunhour-1, sunminute,transit)));
+                     else             asc  = (Math.floor(calc_ascendant(sunhour,   sunminute,transit)));
                      rsun = (Math.floor(calc_vsop87(1,jd))+180);
                      if(asc  < 0.0)asc  += 360;if(asc  > 360)asc  -= 360;
                      if(rsun < 0.0)rsun += 360;if(rsun > 360)rsun -= 360;
